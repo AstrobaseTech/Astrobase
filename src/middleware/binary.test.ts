@@ -1,5 +1,5 @@
 import { describe, expect, it, test } from 'vitest';
-import { encodes } from '../../testing/encodes.js';
+import { encodes } from '../../test/util/encodes.js';
 import { Hash } from '../immutable/hashes.js';
 import { BinaryMiddleware } from './binary.js';
 

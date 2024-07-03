@@ -21,7 +21,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*.test.*', '**/test/**/*', '**/testing/**/*'],
+      files: ['*.test.*', '**/test/**/*'],
       rules: {
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-explicit-any': 'off',

@@ -4,8 +4,8 @@ import {
   fakeErrorDriver,
   fakeValidDriver,
   fakeVoidDriver,
-} from '../../testing/drivers.js';
-import { resolveBeforeTimeout } from '../../testing/utils.js';
+} from '../../test/util/drivers.js';
+import { resolveBeforeTimeout } from '../../test/util/utils.js';
 import { Identifier } from '../identifiers/identifiers.js';
 import {
   getChannels,
