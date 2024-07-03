@@ -1,4 +1,12 @@
-import type { MaybePromise } from '../../internal/index.js';
+import { Registry, type MaybePromise, type RegistryModule } from '../../internal/index.js';
+import { getIdentity } from '../../keyrings/server/identity.js';
+import {
+  clearKeyring,
+  createKeyring,
+  importKeyring,
+  loadKeyring,
+} from '../../keyrings/server/keyring.js';
+import { unwrap, wrap } from '../../wraps/wraps.js';
 import type { RequestMessage, ResponseMessage } from '../types.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -7,23 +15,27 @@ export type RequestHandler<Req = any, Res = any> = (
   instanceID?: string,
 ) => MaybePromise<Res>;
 
+export interface HandlerRegistryModule extends RegistryModule<string> {
+  handler: RequestHandler;
+}
+
 /**
- * A `Map` instance of request handlers mapped to their request type. You can use this to register
- * request handlers when this process is used as an RPC server.
- *
- * The following snippet will register a handler for the `speak` request type. Whenever a `speak`
- * type request comes in, this handler is used to process the request and get the response, which in
- * this case is `Hello!`.
- *
- *     const requestType = 'speak';
- *
- *     const handler = (request, instanceID) => {
- *       return 'Hello!';
- *     };
- *
- *     Handlers.set(requestType, handler);
+ * This {@linkcode Registry} allows registration and overriding of RPC request handlers by request
+ * type.
  */
-export const Handlers = new Map<string, RequestHandler>();
+export const HandlerRegistry = new Registry<string, HandlerRegistryModule>({
+  defaults: {
+    'identity.get': { handler: getIdentity },
+    'keyring.clear': { handler: (_, instanceID) => clearKeyring(instanceID) },
+    'keyring.create': { handler: createKeyring },
+    'keyring.import': { handler: importKeyring },
+    'keyring.load': { handler: loadKeyring },
+    unwrap: { handler: unwrap },
+    wrap: { handler: wrap },
+  },
+  validateKey: (k) => typeof k === 'string',
+  validateModule: (m) => typeof m.handler === 'function',
+});
 
 function createError(request: RequestMessage, error?: string): ResponseMessage {
   const { instanceID, jobID, op } = request;
@@ -37,10 +49,7 @@ function createError(request: RequestMessage, error?: string): ResponseMessage {
 }
 
 export async function processRequest(request: RequestMessage): Promise<ResponseMessage> {
-  const handler = Handlers.get(request.op);
-  if (!handler) {
-    return createError(request, 'Unknown request type');
-  }
+  const { handler } = HandlerRegistry.getStrict(request.op);
   try {
     // eslint-disable-next-line
     var payload = await Promise.resolve(handler(request.payload, request.instanceID));

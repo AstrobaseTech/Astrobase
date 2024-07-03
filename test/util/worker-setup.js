@@ -1,20 +1,26 @@
 // @ts-nocheck
 
-import { Handlers, listen } from '../../src/rpc/server/index.js';
+import { HandlerRegistry, listen } from '../../src/rpc/server/index.js';
 
 export function setupTestWorkerScript(target) {
-  Handlers.set('testsuccess', (request, instanceID) => {
-    if (request !== '12' || instanceID !== '34') {
-      throw new Error('Unexpected request or instanceID value');
-    }
-    return 'success';
+  HandlerRegistry.register({
+    key: 'testsuccess',
+    handler: (request, instanceID) => {
+      if (request !== '12' || instanceID !== '34') {
+        throw new Error('Unexpected request or instanceID value');
+      }
+      return 'success';
+    },
   });
 
-  Handlers.set('testerror', (request, instanceID) => {
-    if (request !== '12' || instanceID !== '34') {
-      throw new Error('Unexpected request or instanceID value');
-    }
-    throw new Error('Expected error');
+  HandlerRegistry.register({
+    key: 'testerror',
+    handler: (request, instanceID) => {
+      if (request !== '12' || instanceID !== '34') {
+        throw new Error('Unexpected request or instanceID value');
+      }
+      throw new Error('Expected error');
+    },
   });
 
   listen(target);

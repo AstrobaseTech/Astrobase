@@ -5,7 +5,6 @@ import { getChannels } from '../../channels/channels.js';
 import { Hash } from '../../immutable/hashes.js';
 import { indexeddb } from '../../indexeddb/indexeddb.js';
 import { KEYRINGS_INSTANCE_ID, KEYRINGS_INSTANCE_ID as instanceID } from '../shared/constants.js';
-import './init-instance.js';
 import { activeSeeds, clearKeyring, createKeyring, importKeyring } from './keyring.js';
 import { english } from './mnemonic/test/vectors.json';
 

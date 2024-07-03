@@ -8,7 +8,7 @@ import {
   serializeFileContent,
 } from '../immutable/index.js';
 import { Base58, Registry, type RegistryModule } from '../internal/index.js';
-// import { EncryptWrapSchema } from '../keyrings/server/wrap/encrypt.js';
+import { EncryptWrapSchema } from '../keyrings/server/wrap/encrypt.js';
 import { ECDSAWrapModule } from './ecdsa.js';
 
 export type WrapFn<T = unknown, R = unknown> = (config: {
@@ -50,7 +50,7 @@ export interface WrapValue<TName extends string = string, TMetadata = unknown> {
 export const WrapRegistry = new Registry<string, WrapModule>({
   defaults: {
     ecdsa: ECDSAWrapModule,
-    // encrypt: EncryptWrapSchema, // TODO(fix): breaks due to ecc dependancy
+    encrypt: EncryptWrapSchema,
   },
   validateKey: (key) => typeof key === 'string',
 });

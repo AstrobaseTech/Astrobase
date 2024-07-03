@@ -77,6 +77,7 @@ export class RegistryError extends Error {
   constructor(
     /** The {@linkcode RegistryErrorCode}. */
     readonly code: (typeof RegistryErrorCode)[keyof typeof RegistryErrorCode],
+    readonly context?: unknown,
   ) {
     super();
   }
@@ -212,7 +213,7 @@ export class Registry<K extends RegistryKey, T extends RegistryModule<K>> {
   getStrict(key: K, instanceID?: string) {
     const value = this.get(key, instanceID);
     if (!value) {
-      throw new RegistryError(RegistryErrorCode.ModuleNotFound);
+      throw new RegistryError(RegistryErrorCode.ModuleNotFound, key);
     }
     return value;
   }

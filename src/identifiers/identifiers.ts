@@ -7,6 +7,7 @@ import { decode, encode, encodingLength } from 'varint';
 import { queryChannelsAsync, queryChannelsSync } from '../channels/channels.js';
 import { Immutable } from '../immutable/schema.js';
 import { Base58, Registry, type MaybePromise, type RegistryModule } from '../internal/index.js';
+import { KeyringIndexIdentifier } from '../keyrings/server/keyring.js';
 
 /**
  * This interface describes an identifier type and how the application should handle those
@@ -90,7 +91,7 @@ export class Identifier {
  * @category Identifiers
  */
 export const IdentifierRegistry = new Registry<number, IdentifierSchema>({
-  defaults: { 1: Immutable },
+  defaults: { 1: Immutable, 10: KeyringIndexIdentifier },
   validateKey: (key) => Number.isInteger(key),
   validateModule: (value) => typeof value.parse === 'function',
 });
