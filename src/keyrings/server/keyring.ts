@@ -51,7 +51,7 @@ export async function getAvailableKeyringCIDs(): Promise<string[]> {
     new Identifier(KeyringIndexIdentifier.key, []),
     KEYRINGS_INSTANCE_ID,
   );
-  return cid ? (await getFile(cid, KEYRINGS_INSTANCE_ID)) ?? [] : [];
+  return cid ? ((await getFile(cid, KEYRINGS_INSTANCE_ID)) ?? []) : [];
 }
 
 export async function importKeyring(

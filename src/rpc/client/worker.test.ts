@@ -7,11 +7,11 @@ describe.skip('Worker RPC client', () => {
   for (const [suiteName, constructor] of [
     [
       'Web worker support',
-      () => new Worker(new URL('../../../testing/test-web-worker-script.js', import.meta.url)),
+      () => new Worker(new URL('../../../test/util/test-web-worker-script.js', import.meta.url)),
     ],
     [
       'Node.js worker_threads support',
-      () => new NodeWorker('../../../testing/test-node-worker-script.js'),
+      () => new NodeWorker('../../../test/util/test-node-worker-script.js'),
     ],
   ] as const) {
     describe(suiteName, () => {
