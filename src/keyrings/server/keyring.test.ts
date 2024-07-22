@@ -4,7 +4,7 @@ import wordlist from '../../../bip39-wordlist-english.json';
 import { getChannels } from '../../channels/channels.js';
 import { Hash } from '../../immutable/hashes.js';
 import { indexeddb } from '../../indexeddb/indexeddb.js';
-import { KEYRINGS_INSTANCE_ID, KEYRINGS_INSTANCE_ID as instanceID } from '../shared/constants.js';
+import { KEYRINGS_INSTANCE_ID } from '../shared/constants.js';
 import { activeSeeds, clearKeyring, createKeyring, importKeyring } from './keyring.js';
 import { english } from './mnemonic/test/vectors.json';
 
@@ -30,8 +30,8 @@ describe('Keyring Procedures', () => {
     test('Create a keyring and load', async () => {
       const passphrase = new TextDecoder().decode(crypto.getRandomValues(new Uint8Array(8)));
       const metadata = new TextDecoder().decode(crypto.getRandomValues(new Uint8Array(8)));
-      const job = await createKeyring({ metadata, passphrase, wordlist }, instanceID);
-      expect(job.id).toBeInstanceOf(Hash);
+      const job = await createKeyring({ metadata, passphrase, wordlist });
+      expect(job.cid).toBeInstanceOf(Hash);
       expect(job.mnemonic).toBeTypeOf('string');
 
       /** @todo(fix) */
@@ -41,12 +41,12 @@ describe('Keyring Procedures', () => {
     });
 
     it('throws if no options object given', () => {
-      const job = createKeyring(undefined as never, instanceID);
+      const job = createKeyring(undefined as never);
       void expect(job).rejects.toThrow(TypeError);
     });
 
     it('disallows blank passphrases', () => {
-      const job = createKeyring({} as never, instanceID);
+      const job = createKeyring({} as never);
       void expect(job).rejects.toThrow(TypeError);
     });
   });
@@ -57,7 +57,7 @@ describe('Keyring Procedures', () => {
       const metadata = new TextDecoder().decode(crypto.getRandomValues(new Uint8Array(8)));
       // let lastSeed = activeSeeds[instanceID];
       for (const [, mnemonic] of english) {
-        const id = await importKeyring({ metadata, mnemonic, passphrase, wordlist }, instanceID);
+        const id = await importKeyring({ metadata, mnemonic, passphrase, wordlist });
         expect(id).toBeInstanceOf(Hash);
 
         /** @todo(fix) */
@@ -69,12 +69,12 @@ describe('Keyring Procedures', () => {
     });
 
     it('throws if no options object given', () => {
-      const job = importKeyring(undefined as never, instanceID);
+      const job = importKeyring(undefined as never);
       void expect(job).rejects.toThrow(TypeError);
     });
 
     it('disallows blank passphrases', () => {
-      const job = importKeyring({} as never, instanceID);
+      const job = importKeyring({} as never);
       void expect(job).rejects.toThrow(TypeError);
     });
   });

@@ -18,7 +18,7 @@ export interface ImportKeyringRequest<T = unknown> extends CreateKeyringRequest<
 
 export interface LoadKeyringRequest {
   /** The CID of the target keyring. */
-  id: CIDLike;
+  cid: CIDLike;
   /** The passphrase needed to decrypt the keyring. */
   passphrase: string;
   /** The wordlist to use for the mnemonic. */
@@ -29,7 +29,7 @@ export interface CreateKeyringResult {
   /** The BIP39 mnemonic (recovery phrase) of the created keyring. */
   mnemonic: string;
   /** The CID of the created keyring. */
-  id: Hash;
+  cid: Hash;
 }
 
 /** The CID of the imported keyring. */

@@ -2,18 +2,21 @@ import { expect, test } from 'vitest';
 import { ACTIVE_KEYRING_CHANGE, emit, subscribe } from './events.js';
 
 test('Events', () => {
-  let i = 0;
-  let j = 0;
+  let iteratorA = 0;
+  let iteratorB = 0;
+
+  const cidA = new Uint8Array();
+  const cidB = new Uint8Array();
 
   subscribe(ACTIVE_KEYRING_CHANGE, (keyring, instanceID) => {
     expect(!instanceID || instanceID === 'abc').toBe(true);
-    expect(keyring?.id).toBe(instanceID ? 1 : 0);
-    instanceID ? j++ : i++;
+    expect(keyring?.cid).toBe(instanceID ? cidB : cidA);
+    instanceID ? iteratorB++ : iteratorA++;
   });
 
-  emit(ACTIVE_KEYRING_CHANGE, { id: 0 });
-  emit(ACTIVE_KEYRING_CHANGE, { id: 1 }, 'abc');
+  emit(ACTIVE_KEYRING_CHANGE, { cid: cidA });
+  emit(ACTIVE_KEYRING_CHANGE, { cid: cidB }, 'abc');
 
-  expect(i).toBe(1);
-  expect(j).toBe(1);
+  expect(iteratorA).toBe(1);
+  expect(iteratorB).toBe(1);
 });

@@ -32,17 +32,16 @@ export function clearKeyring(instanceID = '') {
 
 export async function createKeyring(
   request: P.CreateKeyringRequest,
-  instanceID?: string,
 ): Promise<P.CreateKeyringResult> {
   if (!request.passphrase) {
     throw new TypeError('No passphrase provided');
   }
   const entropy = crypto.getRandomValues(new Uint8Array(16));
-  const [mnemonic, id] = await Promise.all([
+  const [mnemonic, cid] = await Promise.all([
     entropyToMnemonic(entropy, request.wordlist).then((m) => m.join(' ')),
-    saveKeyring(entropy, request.passphrase, request.metadata, undefined, instanceID),
+    saveKeyring(entropy, request.passphrase, request.metadata),
   ]);
-  return { mnemonic, id };
+  return { mnemonic, cid };
 }
 
 /** @returns A promise that resolves with an array of all available keyring identifier strings. */
@@ -54,22 +53,19 @@ export async function getAvailableKeyringCIDs(): Promise<string[]> {
   return cid ? ((await getFile(cid, KEYRINGS_INSTANCE_ID)) ?? []) : [];
 }
 
-export async function importKeyring(
-  request: P.ImportKeyringRequest,
-  instanceID?: string,
-): Promise<P.ImportKeyringResult> {
+export async function importKeyring(request: P.ImportKeyringRequest) {
   if (!request.passphrase) {
     throw new TypeError('No passphrase provided');
   }
   const entropy = await mnemonicToEntropy(request.mnemonic.split(' '), request.wordlist);
-  return saveKeyring(entropy, request.passphrase, request.metadata, undefined, instanceID);
+  return saveKeyring(entropy, request.passphrase, request.metadata);
 }
 
 export async function loadKeyring<T>(
   request: P.LoadKeyringRequest,
   instanceID?: string,
 ): Promise<T> {
-  const keyring = await getFile<PersistedKeyring<T>>(request.id, instanceID);
+  const keyring = await getFile<PersistedKeyring<T>>(request.cid, KEYRINGS_INSTANCE_ID);
   if (!keyring) {
     throw new Error('Keyring not found');
   }
@@ -86,7 +82,6 @@ export async function saveKeyring(
   passphrase: string,
   metadata: unknown,
   replaceCID?: CIDLike,
-  instanceID?: string,
 ): Promise<Hash> {
   const payload: WrapConfig = {
     mediaType: 'application/octet-stream',
@@ -94,7 +89,9 @@ export async function saveKeyring(
     type: 'encrypt',
     value: entropy,
   };
-  const cid = await putFile({ metadata, payload }, 'application/json', { instanceID });
+  const cid = await putFile({ metadata, payload }, 'application/json', {
+    instanceID: KEYRINGS_INSTANCE_ID,
+  });
   const cidB58 = cid.toBase58();
   const index = await getAvailableKeyringCIDs();
   if (!index.includes(cidB58)) {
@@ -106,7 +103,7 @@ export async function saveKeyring(
    * replaceCID != cid. For now, it's not an issue as long as each cipher payload uses unique IV/salt.
    */
   if (replaceCID) {
-    void deleteFile(replaceCID, instanceID);
+    void deleteFile(replaceCID, KEYRINGS_INSTANCE_ID);
   }
 
   return cid;
