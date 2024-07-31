@@ -7,7 +7,7 @@ describe('calculateClusterSize', () => {
   });
 
   it('works if hardwareConcurrency undefined', () => {
-    vitest.spyOn(navigator as any, 'hardwareConcurrency', 'get').mockReturnValue(undefined);
+    vitest.spyOn(navigator, 'hardwareConcurrency', 'get').mockReturnValue(undefined as never);
     expect(typeof calculateClusterSize()).toBe('number');
   });
 
