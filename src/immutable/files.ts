@@ -32,8 +32,10 @@ export async function putFile(
   return objectHash;
 }
 
+/** @deprecated A new File API is under construction */
 export type ParsedFileContent = [version: number, mediaType: string, payload: Uint8Array];
 
+/** @deprecated A new File API is under construction */
 export function parseFileContent(content: Uint8Array, trust = false): ParsedFileContent {
   const nulIndex = content.indexOf(0, 4);
 
@@ -56,6 +58,7 @@ export function parseFileContent(content: Uint8Array, trust = false): ParsedFile
   return [version, new TextDecoder().decode(mediaTypeBytes), content.subarray(nulIndex + 1)];
 }
 
+/** @deprecated A new File API is under construction */
 export interface SerializeContentOptions {
   /**
    * Set to true to use a encoded payload. When this option is enabled, the value must be a
@@ -73,6 +76,7 @@ export interface SerializeContentOptions {
   trust?: boolean;
 }
 
+/** @deprecated A new File API is under construction */
 export async function serializeFileContent(
   value: unknown,
   mediaType: string | MediaType,
