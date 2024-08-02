@@ -1,23 +1,59 @@
 import { encode, encodingLength } from 'varint';
-import { describe, expect, test } from 'vitest';
-import { DEFAULT_FILE_VERSION, File, SUPPORTED_FILE_VERSIONS } from './file.js';
+import { describe, expect, it, test } from 'vitest';
+import { DEFAULT_FILE_VERSION, FileBuilder, SUPPORTED_FILE_VERSIONS } from './file.js';
 import { fuzz } from '../../test/util/utils.js';
 
 describe('File Builder API', () => {
   /** The default empty file, when no buffer value is given, should be valid and completely blank */
   test('Default empty file validity', () => {
-    const file = new File();
-    expect(file.buffer).toEqual([DEFAULT_FILE_VERSION, 0]);
+    const file = new FileBuilder();
+    expect(file.buffer).toEqual(new Uint8Array([DEFAULT_FILE_VERSION, 0]));
     expect(file.flagsByte).toBe(0);
     expect(file.hasMediaType).toBe(false);
     expect(file.hasTimestamp).toBe(false);
     expect(file.mediaType).toBeUndefined();
     expect(file.mediaTypeEncodingEnd).toBeUndefined();
     expect(file.mediaTypeEncodingStart).toBeUndefined();
-    expect(file.payload).toEqual([]);
+    expect(file.payload).toEqual(new Uint8Array());
     expect(file.timestamp).toBeUndefined();
     expect(file.version).toBe(DEFAULT_FILE_VERSION);
     expect(file.versionEncodingLength).toBe(encodingLength(DEFAULT_FILE_VERSION));
+  });
+
+  /**
+   * Buffer can be assigned directly via a setter or set using a builder pattern which returns the
+   * file for method chaining. It accepts ArrayLike values.
+   */
+  describe('Set the buffer', () => {
+    const file = new FileBuilder();
+    let buffer: Uint8Array;
+    let builderReturn: FileBuilder;
+
+    test('Assign Uint8Array to setter', () => {
+      buffer = crypto.getRandomValues(new Uint8Array(32));
+      file.buffer = buffer;
+      expect(file.buffer).toEqual(buffer);
+    });
+
+    test('Pass Uint8Array to builder', () => {
+      buffer = crypto.getRandomValues(new Uint8Array(32));
+      builderReturn = file.setBuffer(buffer);
+      expect(builderReturn).toBe(file);
+      expect(file.buffer).toEqual(buffer);
+    });
+
+    test('Assign array to setter', () => {
+      buffer = crypto.getRandomValues(new Uint8Array(32));
+      file.buffer = Array.from(buffer);
+      expect(file.buffer).toEqual(buffer);
+    });
+
+    test('Pass array to builder', () => {
+      buffer = crypto.getRandomValues(new Uint8Array(32));
+      builderReturn = file.setBuffer(Array.from(buffer));
+      expect(builderReturn).toBe(file);
+      expect(file.buffer).toEqual(buffer);
+    });
   });
 
   /**
@@ -25,13 +61,16 @@ describe('File Builder API', () => {
    * throw a `TypeError` when attempting to parse anything else from the file buffer.
    */
   test('Unrecognised version behaviour', () => {
+    const file = new FileBuilder();
+    const tested = new Set<number>();
+
     fuzz(() => {
-      const file = new File();
       let version: number;
 
       do {
         version = Math.round(Math.random() * Number.MAX_SAFE_INTEGER);
-      } while (SUPPORTED_FILE_VERSIONS.includes(version));
+      } while (SUPPORTED_FILE_VERSIONS.has(version) || tested.has(version));
+      tested.add(version);
 
       file.buffer = [...encode(version), 0];
 
@@ -49,9 +88,68 @@ describe('File Builder API', () => {
     }, 1000);
   });
 
-  test.todo('Media type parsing');
+  describe('Timestamp parsing', () => {
+    /**
+     * A timestamped file will have the timestamp bit flag set. The timestamp immediately follows
+     * the flags byte and is 4 bytes long. It is a 32 bit unsigned integer, encoded with the least
+     * significant byte (LSB) first.
+     */
+    it('Parses valid files with timestamps', () => {
+      for (const [bytes, timestamp] of [
+        [[0, 0, 0, 0], 0],
+        [[241, 151, 63, 18], 306157553],
+        [[68, 145, 133, 216], 3632632132],
+        [[70, 140, 41, 217], 3643378758],
+        [[174, 133, 123, 24], 410748334],
+        [[185, 116, 134, 24], 411464889],
+        [[165, 90, 147, 251], 4220738213],
+        [[15, 182, 47, 32], 539997711],
+        [[66, 230, 133, 139], 2340808258],
+        [[173, 201, 84, 177], 2975123885],
+      ] as const) {
+        const file = new FileBuilder([1, 0b10000000, ...bytes]);
+        expect(file.hasTimestamp).toBe(true);
+        expect(file.timestamp).toBe(timestamp);
+      }
+    });
 
-  test.todo('Timestamp parsing');
+    it('Throws for EOF error', () => {
+      const file = new FileBuilder([1, 0b10000000, 0]);
+      expect(file.hasTimestamp).toBe(true);
+      expect(() => file.timestamp).toThrow(RangeError);
+    });
+  });
+
+  describe('Media type parsing', () => {
+    /**
+     * A file with a media type will have the media type bit flag set. The media type is an ASCII
+     * encoded string that follows the timestamp and is terminated by a NUL (0x00) byte.
+     */
+    it('Parses valid files with a media type', () => {
+      fuzz(() => {
+        const mediaType = crypto.getRandomValues(new Uint8Array(25)).map((b) => (b == 0 ? 1 : b));
+        mediaType[24] = 0;
+        const timestamp = crypto.getRandomValues(new Uint8Array(4));
+
+        const nonTimestampedFile = new FileBuilder([1, 0b01000000, ...mediaType]);
+        const timestampedFile = new FileBuilder([1, 0b11000000, ...timestamp, ...mediaType]);
+
+        const mediaTypeWithoutNul = mediaType.subarray(0, 24);
+
+        expect(nonTimestampedFile.hasMediaType).toBe(true);
+        expect(nonTimestampedFile.mediaType).toEqual(mediaTypeWithoutNul);
+
+        expect(timestampedFile.hasMediaType).toBe(true);
+        expect(timestampedFile.mediaType).toEqual(mediaTypeWithoutNul);
+      }, 1000);
+    });
+
+    it('Throws for EOF error', () => {
+      const file = new FileBuilder([1, 0b01000000]);
+      expect(file.hasMediaType).toBe(true);
+      expect(() => file.mediaType).toThrow(RangeError);
+    });
+  });
 
   test.todo('Payload parsing');
 });

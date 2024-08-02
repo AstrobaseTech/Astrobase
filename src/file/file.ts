@@ -1,6 +1,6 @@
 import { decode, encodingLength } from 'varint';
 
-export const SUPPORTED_FILE_VERSIONS = [1];
+export const SUPPORTED_FILE_VERSIONS = new Set([1]);
 export const DEFAULT_FILE_VERSION = 1;
 
 /**
@@ -9,20 +9,33 @@ export const DEFAULT_FILE_VERSION = 1;
  *
  * @experimental
  */
-export class File {
-  buffer;
+export class FileBuilder {
+  private _buffer: Uint8Array;
 
-  constructor(fileBuffer: Uint8Array | number[] = [DEFAULT_FILE_VERSION, 0]) {
+  constructor(fileBuffer: ArrayLike<number> | ArrayBufferLike = [DEFAULT_FILE_VERSION, 0]) {
+    this._buffer = new Uint8Array(fileBuffer);
+  }
+
+  get buffer(): Uint8Array {
+    return this._buffer;
+  }
+
+  set buffer(fileBuffer: ArrayLike<number> | ArrayBufferLike) {
+    this._buffer = new Uint8Array(fileBuffer);
+  }
+
+  setBuffer(fileBuffer: ArrayLike<number> | ArrayBufferLike) {
     this.buffer = fileBuffer;
+    return this;
   }
 
   /**
    * The file encoding version integer. This is encoded as a varint for future-proofing. As of the
-   * time of publishing this library, only encoding version `1` exists, so no other file encoding
-   * versions will be understood.
+   * time of publishing this library, only encoding version `1` exists. No other file encoding
+   * versions will be understood, so it is not possible to set this value.
    */
   get version() {
-    return decode(this.buffer);
+    return decode(this._buffer);
   }
 
   /** The number of bytes the version integer uses when encoded as a varint. */
@@ -36,10 +49,10 @@ export class File {
    * @throws {TypeError} If the file version is unsupported.
    */
   get flagsByte() {
-    if (!SUPPORTED_FILE_VERSIONS.includes(this.version)) {
+    if (!SUPPORTED_FILE_VERSIONS.has(this.version)) {
       throw new TypeError('Unsupported file version');
     }
-    return this.buffer[this.versionEncodingLength];
+    return this._buffer[this.versionEncodingLength];
   }
 
   /**
@@ -68,11 +81,11 @@ export class File {
    */
   get timestamp() {
     if (this.hasTimestamp) {
-      let timestamp = 0;
-      for (let i = this.versionEncodingLength + 1, j = 0; j != 32; i++, j += 8) {
-        timestamp += this.buffer[i] << j;
-      }
-      return timestamp;
+      return new DataView(
+        this._buffer.buffer,
+        this._buffer.byteOffset,
+        this._buffer.byteLength,
+      ).getUint32(2, true);
     }
   }
 
@@ -97,9 +110,11 @@ export class File {
   get mediaTypeEncodingEnd() {
     const start = this.mediaTypeEncodingStart;
     if (start) {
-      // eslint-disable-next-line no-constant-condition
-      for (let i = start + 3; true; i++) {
-        if (this.buffer[i] == 0) {
+      for (let i = start + 3; i < 128; i++) {
+        if (this._buffer[i] === undefined) {
+          throw new RangeError();
+        }
+        if (this._buffer[i] == 0) {
           return i;
         }
       }
@@ -114,7 +129,7 @@ export class File {
   get mediaType() {
     const end = this.mediaTypeEncodingEnd;
     if (end) {
-      return this.buffer.slice(this.mediaTypeEncodingStart, end);
+      return this._buffer.slice(this.mediaTypeEncodingStart, end);
     }
   }
 
@@ -124,7 +139,7 @@ export class File {
    * @throws {TypeError} If the file version is unsupported.
    */
   get payload() {
-    return this.buffer.slice(
+    return this._buffer.slice(
       (this.mediaTypeEncodingEnd ?? this.versionEncodingLength + (this.hasTimestamp ? 4 : 0)) + 1,
     );
   }
