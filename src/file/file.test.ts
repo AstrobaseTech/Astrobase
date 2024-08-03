@@ -1,7 +1,12 @@
 import { encode, encodingLength } from 'varint';
-import { describe, expect, it, test } from 'vitest';
-import { DEFAULT_FILE_VERSION, FileBuilder, SUPPORTED_FILE_VERSIONS } from './file.js';
+import { beforeEach, describe, expect, it, test } from 'vitest';
 import { fuzz } from '../../test/util/utils.js';
+import {
+  DEFAULT_FILE_VERSION,
+  FileBuilder,
+  SUPPORTED_FILE_VERSIONS,
+  TIMESTAMP_BITMASK,
+} from './file.js';
 
 describe('File Builder API', () => {
   /** The default empty file, when no buffer value is given, should be valid and completely blank */
@@ -88,35 +93,86 @@ describe('File Builder API', () => {
     }, 1000);
   });
 
-  describe('Timestamp parsing', () => {
-    /**
-     * A timestamped file will have the timestamp bit flag set. The timestamp immediately follows
-     * the flags byte and is 4 bytes long. It is a 32 bit unsigned integer, encoded with the least
-     * significant byte (LSB) first.
-     */
-    it('Parses valid files with timestamps', () => {
-      for (const [bytes, timestamp] of [
-        [[0, 0, 0, 0], 0],
-        [[241, 151, 63, 18], 306157553],
-        [[68, 145, 133, 216], 3632632132],
-        [[70, 140, 41, 217], 3643378758],
-        [[174, 133, 123, 24], 410748334],
-        [[185, 116, 134, 24], 411464889],
-        [[165, 90, 147, 251], 4220738213],
-        [[15, 182, 47, 32], 539997711],
-        [[66, 230, 133, 139], 2340808258],
-        [[173, 201, 84, 177], 2975123885],
-      ] as const) {
-        const file = new FileBuilder([1, 0b10000000, ...bytes]);
+  describe('Timestamp', () => {
+    describe('Timestamp parsing', () => {
+      /**
+       * A timestamped file will have the timestamp bit flag set. The timestamp immediately follows
+       * the flags byte and is 4 bytes long. It is a 32 bit unsigned integer, encoded with the least
+       * significant byte (LSB) first.
+       */
+      it('Parses valid files with timestamps', () => {
+        for (const [bytes, timestamp] of [
+          [[0, 0, 0, 0], 0],
+          [[241, 151, 63, 18], 306157553],
+          [[68, 145, 133, 216], 3632632132],
+          [[70, 140, 41, 217], 3643378758],
+          [[174, 133, 123, 24], 410748334],
+          [[185, 116, 134, 24], 411464889],
+          [[165, 90, 147, 251], 4220738213],
+          [[15, 182, 47, 32], 539997711],
+          [[66, 230, 133, 139], 2340808258],
+          [[173, 201, 84, 177], 2975123885],
+        ] as const) {
+          const file = new FileBuilder([1, 0b10000000, ...bytes]);
+          expect(file.hasTimestamp).toBe(true);
+          expect(file.timestamp).toBe(timestamp);
+        }
+      });
+
+      it('Throws for EOF error', () => {
+        const file = new FileBuilder([1, 0b10000000, 0]);
         expect(file.hasTimestamp).toBe(true);
-        expect(file.timestamp).toBe(timestamp);
-      }
+        expect(() => file.timestamp).toThrow(RangeError);
+      });
     });
 
-    it('Throws for EOF error', () => {
-      const file = new FileBuilder([1, 0b10000000, 0]);
+    const payload = Uint8Array.from([1, 2, 3, 4]);
+
+    describe('Set the timestamp', () => {
+      const file = new FileBuilder([1, 0, ...payload]);
+      let timestamp: number;
+
+      expect(file.version).toBe(1);
+      expect(file.hasTimestamp).toBe(false);
+      expect(file.timestamp).toBeUndefined();
+      expect(file.payload).toEqual(payload);
+
+      beforeEach(() => {
+        timestamp = Math.floor(Math.random() * (2 ** 32 - 1));
+      });
+
+      test('Direct assignment', () => {
+        expect(() => (file.timestamp = timestamp)).not.toThrow();
+
+        expect(file.hasTimestamp).toBe(true);
+        expect(file.timestamp).toBe(timestamp);
+        expect(file.payload).toEqual(payload);
+      });
+
+      test('Builder', () => {
+        const builderReturn = file.setTimestamp(timestamp);
+        expect(builderReturn).toBe(file);
+
+        expect(file.hasTimestamp).toBe(true);
+        expect(file.timestamp).toBe(timestamp);
+        expect(file.payload).toEqual(payload);
+      });
+    });
+
+    test('Clear the timestamp', () => {
+      const file = new FileBuilder([1, TIMESTAMP_BITMASK, 80, 0, 0, 0, ...payload]);
+
+      expect(file.version).toBe(1);
       expect(file.hasTimestamp).toBe(true);
-      expect(() => file.timestamp).toThrow(RangeError);
+      expect(file.timestamp).toBe(80);
+      expect(file.payload).toEqual(payload);
+
+      const builderReturn = file.clearTimestamp();
+      expect(builderReturn).toBe(file);
+
+      expect(file.hasTimestamp).toBe(false);
+      expect(file.timestamp).toBeUndefined();
+      expect(file.payload).toEqual(payload);
     });
   });
 
@@ -150,6 +206,4 @@ describe('File Builder API', () => {
       expect(() => file.mediaType).toThrow(RangeError);
     });
   });
-
-  test.todo('Payload parsing');
 });

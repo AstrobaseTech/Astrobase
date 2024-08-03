@@ -3,6 +3,9 @@ import { decode, encodingLength } from 'varint';
 export const SUPPORTED_FILE_VERSIONS = new Set([1]);
 export const DEFAULT_FILE_VERSION = 1;
 
+export const TIMESTAMP_BITMASK = 0b10000000;
+export const MEDIA_TYPE_BITMASK = 0b01000000;
+
 /**
  * Represents a File buffer loaded into memory and contains getters that parse the buffer to
  * retrieve values.
@@ -16,6 +19,7 @@ export class FileBuilder {
     this._buffer = new Uint8Array(fileBuffer);
   }
 
+  /** The raw, underlying buffer of the file. */
   get buffer(): Uint8Array {
     return this._buffer;
   }
@@ -24,6 +28,11 @@ export class FileBuilder {
     this._buffer = new Uint8Array(fileBuffer);
   }
 
+  /**
+   * Set the raw buffer of the file.
+   *
+   * @returns The file, for method chaining.
+   */
   setBuffer(fileBuffer: ArrayLike<number> | ArrayBufferLike) {
     this.buffer = fileBuffer;
     return this;
@@ -61,7 +70,7 @@ export class FileBuilder {
    * @throws {TypeError} If the file version is unsupported.
    */
   get hasTimestamp() {
-    return !!(this.flagsByte & 0b10000000);
+    return !!(this.flagsByte & TIMESTAMP_BITMASK);
   }
 
   /**
@@ -70,7 +79,7 @@ export class FileBuilder {
    * @throws {TypeError} If the file version is unsupported.
    */
   get hasMediaType() {
-    return !!(this.flagsByte & 0b01000000);
+    return !!(this.flagsByte & MEDIA_TYPE_BITMASK);
   }
 
   /**
@@ -79,14 +88,54 @@ export class FileBuilder {
    *
    * @throws {TypeError} If the file version is unsupported.
    */
-  get timestamp() {
+  get timestamp(): number | undefined {
     if (this.hasTimestamp) {
       return new DataView(
         this._buffer.buffer,
         this._buffer.byteOffset,
         this._buffer.byteLength,
-      ).getUint32(2, true);
+      ).getUint32(this.versionEncodingLength + 1, true);
     }
+  }
+
+  set timestamp(timestamp: number) {
+    if (!this.hasTimestamp) {
+      // Extend the buffer and add space for the timestamp
+      const versionBytes = this._buffer.subarray(0, this.versionEncodingLength);
+      const flagsByte = this.flagsByte | TIMESTAMP_BITMASK; // Set the timestamp bit
+      const postBytes = this._buffer.subarray(this.versionEncodingLength + 1);
+      this._buffer = Uint8Array.from([...versionBytes, flagsByte, 0, 0, 0, 0, ...postBytes]);
+    }
+
+    new DataView(this._buffer.buffer, this._buffer.byteOffset, this._buffer.byteLength).setUint32(
+      2,
+      timestamp,
+      true,
+    );
+  }
+
+  /**
+   * Set the Unix timestamp of the file.
+   *
+   * @param timestamp The number of seconds since Unix epoch UTC. If omitted, the current time will
+   *   be used.
+   * @returns The file, for method chaining.
+   * @throws {TypeError} If the file version is unsupported.
+   */
+  setTimestamp(timestamp = Math.floor(Date.now() / 1000)) {
+    this.timestamp = timestamp;
+    return this;
+  }
+
+  clearTimestamp() {
+    if (this.hasTimestamp) {
+      // Shrink the buffer, removing the timestamp
+      const versionBytes = this._buffer.subarray(0, this.versionEncodingLength);
+      const flagsByte = this.flagsByte & ~TIMESTAMP_BITMASK; // Unset the timestamp bit
+      const postBytes = this._buffer.subarray(this.versionEncodingLength + 5);
+      this._buffer = Uint8Array.from([...versionBytes, flagsByte, ...postBytes]);
+    }
+    return this;
   }
 
   /**
