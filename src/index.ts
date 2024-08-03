@@ -1,5 +1,6 @@
 export * from './channels/channels.js';
 export * from './client/index.js';
+export * from './file/file.js';
 export * from './identifiers/identifiers.js';
 export * from './immutable/index.js';
 export * from './indexeddb/indexeddb.js';

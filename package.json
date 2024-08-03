@@ -29,6 +29,10 @@
       "types": "./dist/channels/channels.d.ts",
       "default": "./dist/channels/channels.js"
     },
+    "./file": {
+      "types": "./dist/file/file.d.ts",
+      "default": "./dist/file/file.js"
+    },
     "./identifiers": {
       "types": "./dist/identifiers/identifiers.d.ts",
       "default": "./dist/identifiers/identifiers.js"

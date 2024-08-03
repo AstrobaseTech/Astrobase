@@ -1,4 +1,6 @@
+import type { MediaType } from 'content-type';
 import { decode, encodingLength } from 'varint';
+import { encodeMediaType, validateMediaType } from './media-types.js';
 
 export const SUPPORTED_FILE_VERSIONS = new Set([1]);
 export const DEFAULT_FILE_VERSION = 1;
@@ -38,16 +40,12 @@ export class FileBuilder {
     return this;
   }
 
-  /**
-   * The file encoding version integer. This is encoded as a varint for future-proofing. As of the
-   * time of publishing this library, only encoding version `1` exists. No other file encoding
-   * versions will be understood, so it is not possible to set this value.
-   */
+  /** The File encoding version integer. */
   get version() {
     return decode(this._buffer);
   }
 
-  /** The number of bytes the version integer uses when encoded as a varint. */
+  /** The number of bytes that the version integer uses when encoded as a varint. */
   get versionEncodingLength() {
     return encodingLength(this.version);
   }
@@ -83,8 +81,7 @@ export class FileBuilder {
   }
 
   /**
-   * The Unix timestamp of the file. This is encoded as an unsigned 32 bit integer with granularity
-   * to the second. If the file does not have a timestamp, this will be `undefined`.
+   * The file's Unix timestamp. If the file does not have a timestamp, this will be `undefined`.
    *
    * @throws {TypeError} If the file version is unsupported.
    */
@@ -115,10 +112,10 @@ export class FileBuilder {
   }
 
   /**
-   * Set the Unix timestamp of the file.
+   * Sets the file's Unix timestamp.
    *
-   * @param timestamp The number of seconds since Unix epoch UTC. If omitted, the current time will
-   *   be used.
+   * @param timestamp The number of seconds since Unix epoch. If omitted, the current time will be
+   *   used.
    * @returns The file, for method chaining.
    * @throws {TypeError} If the file version is unsupported.
    */
@@ -127,6 +124,12 @@ export class FileBuilder {
     return this;
   }
 
+  /**
+   * Clear's the file's Unix timestamp.
+   *
+   * @returns The file, for method chaining.
+   * @throws {TypeError} If the file version is unsupported.
+   */
   clearTimestamp() {
     if (this.hasTimestamp) {
       // Shrink the buffer, removing the timestamp
@@ -175,11 +178,45 @@ export class FileBuilder {
    *
    * @throws {TypeError} If the file version is unsupported.
    */
-  get mediaType() {
+  get mediaType(): string | undefined {
     const end = this.mediaTypeEncodingEnd;
     if (end) {
-      return this._buffer.slice(this.mediaTypeEncodingStart, end);
+      return new TextDecoder().decode(this._buffer.subarray(this.mediaTypeEncodingStart, end));
     }
+  }
+
+  set mediaType(mediaType: string | MediaType) {
+    const encodedMediaType = encodeMediaType(mediaType);
+
+    if (!validateMediaType(encodedMediaType)) {
+      throw new TypeError('Invalid media type');
+    }
+
+    const versionBytes = this.buffer.subarray(0, this.versionEncodingLength);
+    const flagsByte = this.flagsByte | MEDIA_TYPE_BITMASK; // Set the media type bit
+    const timestampBytes = this.hasTimestamp
+      ? this._buffer.subarray(this.versionEncodingLength + 1, this.versionEncodingLength + 5)
+      : [];
+    this._buffer = Uint8Array.from([
+      ...versionBytes,
+      flagsByte,
+      ...timestampBytes,
+      ...encodedMediaType,
+      0,
+      ...this.payload,
+    ]);
+  }
+
+  /**
+   * Sets the file's media type.
+   *
+   * @param mediaType The media type string or object.
+   * @returns The file, for method chaining.
+   * @throws {TypeError} If the file version is unsupported.
+   */
+  setMediaType(mediaType: string | MediaType) {
+    this.mediaType = mediaType;
+    return this;
   }
 
   /**

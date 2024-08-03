@@ -1,9 +1,9 @@
-import { format, type MediaType } from 'content-type';
+import type { MediaType } from 'content-type';
 import { Identifier, deleteOne, getOne, putOne } from '../identifiers/identifiers.js';
 import { cidToBytes, type CIDLike } from './cid.js';
 import { encodeWithCodec } from './codecs.js';
 import { Hash, HashAlgorithm, hash } from './hashes.js';
-import { validateMediaType } from './media-types.js';
+import { encodeMediaType, validateMediaType } from '../file/media-types.js';
 import { Immutable } from './schema.js';
 
 export async function deleteFile(cid: CIDLike, instanceID?: string) {
@@ -103,9 +103,7 @@ export async function serializeFileContent(
     encodedPayload = await encodeWithCodec(value, mediaType, options?.instanceID);
   }
 
-  const mediaTypeBytes = new TextEncoder().encode(
-    typeof mediaType === 'string' ? mediaType : format(mediaType),
-  );
+  const mediaTypeBytes = encodeMediaType(mediaType);
 
   if (!options?.trust && !validateMediaType(mediaTypeBytes)) {
     throw new Error('Bad media type');

@@ -1,4 +1,5 @@
 import { parse, type MediaType } from 'content-type';
+import { validateMediaType } from '../file/media-types.js';
 import {
   Registry,
   stringToBytes,
@@ -6,7 +7,6 @@ import {
   type RegistryModule,
 } from '../internal/index.js';
 import { JSONCodec } from '../json/codec.js';
-import { validateMediaType } from './media-types.js';
 
 export interface CodecProps {
   instanceID?: string;

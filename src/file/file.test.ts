@@ -176,34 +176,73 @@ describe('File Builder API', () => {
     });
   });
 
-  describe('Media type parsing', () => {
-    /**
-     * A file with a media type will have the media type bit flag set. The media type is an ASCII
-     * encoded string that follows the timestamp and is terminated by a NUL (0x00) byte.
-     */
-    it('Parses valid files with a media type', () => {
-      fuzz(() => {
-        const mediaType = crypto.getRandomValues(new Uint8Array(25)).map((b) => (b == 0 ? 1 : b));
-        mediaType[24] = 0;
-        const timestamp = crypto.getRandomValues(new Uint8Array(4));
+  describe('Media type', () => {
+    describe('Media type parsing', () => {
+      /**
+       * A file with a media type will have the media type bit flag set. The media type is an ASCII
+       * encoded string that follows the timestamp and is terminated by a NUL (0x00) byte.
+       */
+      it('Parses valid files with a media type', () => {
+        fuzz(() => {
+          const mediaType = crypto.getRandomValues(new Uint8Array(25)).map((b) => (b == 0 ? 1 : b));
+          mediaType[24] = 0;
+          const timestamp = crypto.getRandomValues(new Uint8Array(4));
 
-        const nonTimestampedFile = new FileBuilder([1, 0b01000000, ...mediaType]);
-        const timestampedFile = new FileBuilder([1, 0b11000000, ...timestamp, ...mediaType]);
+          const nonTimestampedFile = new FileBuilder([1, 0b01000000, ...mediaType]);
+          const timestampedFile = new FileBuilder([1, 0b11000000, ...timestamp, ...mediaType]);
 
-        const mediaTypeWithoutNul = mediaType.subarray(0, 24);
+          const mediaTypeWithoutNul = new TextDecoder().decode(mediaType.subarray(0, 24));
 
-        expect(nonTimestampedFile.hasMediaType).toBe(true);
-        expect(nonTimestampedFile.mediaType).toEqual(mediaTypeWithoutNul);
+          expect(nonTimestampedFile.hasMediaType).toBe(true);
+          expect(nonTimestampedFile.mediaType).toEqual(mediaTypeWithoutNul);
 
-        expect(timestampedFile.hasMediaType).toBe(true);
-        expect(timestampedFile.mediaType).toEqual(mediaTypeWithoutNul);
-      }, 1000);
+          expect(timestampedFile.hasMediaType).toBe(true);
+          expect(timestampedFile.mediaType).toEqual(mediaTypeWithoutNul);
+        }, 1000);
+      });
+
+      it('Throws for EOF error', () => {
+        const file = new FileBuilder([1, 0b01000000]);
+        expect(file.hasMediaType).toBe(true);
+        expect(() => file.mediaType).toThrow(RangeError);
+      });
     });
 
-    it('Throws for EOF error', () => {
-      const file = new FileBuilder([1, 0b01000000]);
-      expect(file.hasMediaType).toBe(true);
-      expect(() => file.mediaType).toThrow(RangeError);
+    describe('Set the media type', () => {
+      const badMediaType = '1234567890';
+      const goodMediaType = 'application/json';
+      const payload = Uint8Array.from([1, 2, 3, 4]);
+
+      let file: FileBuilder;
+
+      beforeEach(() => {
+        file = new FileBuilder([1, 0, ...payload]);
+        expect(file.version).toBe(1);
+        expect(file.hasMediaType).toBe(false);
+        expect(file.mediaType).toBeUndefined();
+        expect(file.payload).toEqual(payload);
+      });
+
+      test('Direct assignment', () => {
+        expect(() => (file.mediaType = badMediaType)).toThrow(TypeError);
+
+        expect(() => (file.mediaType = goodMediaType)).not.toThrow();
+
+        expect(file.hasMediaType).toBe(true);
+        expect(file.mediaType).toBe(goodMediaType);
+        expect(file.payload).toEqual(payload);
+      });
+
+      test('Builder', () => {
+        expect(() => file.setMediaType(badMediaType)).toThrow(TypeError);
+
+        const builderReturn = file.setMediaType(goodMediaType);
+        expect(builderReturn).toBe(file);
+
+        expect(file.hasMediaType).toBe(true);
+        expect(file.mediaType).toBe(goodMediaType);
+        expect(file.payload).toEqual(payload);
+      });
     });
   });
 });
