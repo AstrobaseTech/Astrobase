@@ -1,18 +1,30 @@
+/**
+ * @module Files
+ * @category API Reference
+ */
+
 import type { MediaType } from 'content-type';
 import { decode, encodingLength } from 'varint';
 import { decodeWithCodec, encodeWithCodec } from '../codec/codecs.js';
 import { encodeMediaType, validateMediaType } from './media-types.js';
 
+/** @category Files */
 export const SUPPORTED_FILE_VERSIONS = new Set([1]);
+
+/** @category Files */
 export const DEFAULT_FILE_VERSION = 1;
 
+/** @category Files */
 export const TIMESTAMP_BITMASK = 0b10000000;
+
+/** @category Files */
 export const MEDIA_TYPE_BITMASK = 0b01000000;
 
 /**
  * Represents a File buffer loaded into memory and contains getters that parse the buffer to
  * retrieve values.
  *
+ * @category Files
  * @experimental
  */
 export class FileBuilder {

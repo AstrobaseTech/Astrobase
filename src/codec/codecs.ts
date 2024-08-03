@@ -1,3 +1,8 @@
+/**
+ * @module Codecs
+ * @category API Reference
+ */
+
 import { parse, type MediaType } from 'content-type';
 import { validateMediaType } from '../file/media-types.js';
 import {
@@ -8,11 +13,17 @@ import {
 } from '../internal/index.js';
 import { JSONCodec } from '../json/codec.js';
 
+/** @category Codecs */
 export interface CodecProps {
   instanceID?: string;
   mediaType: MediaType;
 }
 
+/**
+ * The interface for a Codec module that can be registered in the {@linkcode CodecRegistry}.
+ *
+ * @category Codecs
+ */
 export interface Codec<T = unknown> extends RegistryModule<string> {
   /**
    * Decodes bytes into the value.
@@ -32,6 +43,7 @@ export interface Codec<T = unknown> extends RegistryModule<string> {
   encode(data: T, props: CodecProps): MaybePromise<Uint8Array>;
 }
 
+/** @category Codecs */
 export const CodecRegistry = new Registry<string, Codec>({
   defaults: {
     'application/json': JSONCodec,
@@ -45,6 +57,7 @@ export const CodecRegistry = new Registry<string, Codec>({
     typeof value.decode === 'function' && typeof value.encode === 'function',
 });
 
+/** @category Codecs */
 export function decodeWithCodec<T>(
   payload: Uint8Array,
   mediaType: string | MediaType,
@@ -59,6 +72,7 @@ export function decodeWithCodec<T>(
   }
 }
 
+/** @category Codecs */
 export async function encodeWithCodec(
   input: unknown,
   mediaType: string | MediaType,

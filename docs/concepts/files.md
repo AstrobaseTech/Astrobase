@@ -1,9 +1,9 @@
 ---
-title: File
+title: Files
 category: Concepts
 ---
 
-# File
+# Files
 
 A file, in Astrobase, is a special encoding format that is used in the Astrobase protocol as a container for binary payloads. It can include certain metadata, like a timestamp and a media type, that can be used by various parts of the system.
 
