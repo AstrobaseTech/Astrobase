@@ -220,13 +220,39 @@ export class FileBuilder {
   }
 
   /**
+   * The position, within the buffer, of the first payload byte.
+   *
+   * @throws {TypeError} If the file version is unsupported.
+   */
+  get payloadEncodingStart() {
+    return (
+      (this.mediaTypeEncodingEnd ?? this.versionEncodingLength + (this.hasTimestamp ? 4 : 0)) + 1
+    );
+  }
+
+  /**
    * The contents of the file.
    *
    * @throws {TypeError} If the file version is unsupported.
    */
-  get payload() {
-    return this._buffer.slice(
-      (this.mediaTypeEncodingEnd ?? this.versionEncodingLength + (this.hasTimestamp ? 4 : 0)) + 1,
-    );
+  get payload(): Uint8Array {
+    return this._buffer.subarray(this.payloadEncodingStart);
+  }
+
+  set payload(payload: ArrayLike<number> | ArrayBufferLike) {
+    const preBytes = this.buffer.subarray(0, this.payloadEncodingStart);
+    this.buffer = Uint8Array.from([...preBytes, ...new Uint8Array(payload)]);
+  }
+
+  /**
+   * Sets the file's payload.
+   *
+   * @param payload The payload.
+   * @returns The file, for method chaining.
+   * @throws {TypeError} If the file version is unsupported.
+   */
+  setPayload(payload: ArrayLike<number> | ArrayBufferLike) {
+    this.payload = payload;
+    return this;
   }
 }

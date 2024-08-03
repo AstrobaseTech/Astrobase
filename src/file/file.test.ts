@@ -245,4 +245,30 @@ describe('File Builder API', () => {
       });
     });
   });
+
+  describe('Set the payload', () => {
+    const payloadBefore = crypto.getRandomValues(new Uint8Array(16));
+    const payloadAfter = crypto.getRandomValues(new Uint8Array(16));
+
+    let file: FileBuilder;
+
+    beforeEach(() => {
+      file = new FileBuilder([1, 0, ...payloadBefore]);
+      expect(file.version).toBe(1);
+      expect(file.hasMediaType).toBe(false);
+      expect(file.mediaType).toBeUndefined();
+      expect(file.payload).toEqual(payloadBefore);
+    });
+
+    test('Direct assignment', () => {
+      expect(() => (file.payload = payloadAfter)).not.toThrow();
+      expect(file.payload).toEqual(payloadAfter);
+    });
+
+    test('Builder', () => {
+      const builderReturn = file.setPayload(payloadAfter);
+      expect(builderReturn).toBe(file);
+      expect(file.payload).toEqual(payloadAfter);
+    });
+  });
 });
