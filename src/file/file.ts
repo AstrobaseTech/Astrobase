@@ -66,7 +66,7 @@ export class FileBuilder {
   /**
    * The value of the byte that contains the feature flags.
    *
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   get flagsByte() {
     if (!SUPPORTED_FILE_VERSIONS.has(this.version)) {
@@ -78,7 +78,7 @@ export class FileBuilder {
   /**
    * Whether the file includes a timestamp.
    *
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   get hasTimestamp() {
     return !!(this.flagsByte & TIMESTAMP_BITMASK);
@@ -87,7 +87,7 @@ export class FileBuilder {
   /**
    * Whether the file includes a media type.
    *
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   get hasMediaType() {
     return !!(this.flagsByte & MEDIA_TYPE_BITMASK);
@@ -96,7 +96,7 @@ export class FileBuilder {
   /**
    * The file's Unix timestamp. If the file does not have a timestamp, this will be `undefined`.
    *
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   get timestamp(): number | undefined {
     if (this.hasTimestamp) {
@@ -130,7 +130,7 @@ export class FileBuilder {
    * @param timestamp The number of seconds since Unix epoch. If omitted, the current time will be
    *   used.
    * @returns The file, for method chaining.
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   setTimestamp(timestamp = Math.floor(Date.now() / 1000)) {
     this.timestamp = timestamp;
@@ -141,7 +141,7 @@ export class FileBuilder {
    * Clear's the file's Unix timestamp.
    *
    * @returns The file, for method chaining.
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   clearTimestamp() {
     if (this.hasTimestamp) {
@@ -158,7 +158,7 @@ export class FileBuilder {
    * The position, within the buffer, of the media type. If the file does not have a media type,
    * this will be `undefined`.
    *
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   get mediaTypeEncodingStart() {
     if (this.hasMediaType) {
@@ -170,7 +170,7 @@ export class FileBuilder {
    * The position, within the buffer, of the `NUL` termination byte. If the file does not have a
    * media type, this will be `undefined`.
    *
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   get mediaTypeEncodingEnd() {
     const start = this.mediaTypeEncodingStart;
@@ -189,7 +189,7 @@ export class FileBuilder {
   /**
    * The media type as a buffer. If the file does not have a media type, this will be `undefined`.
    *
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   get mediaType(): string | undefined {
     const end = this.mediaTypeEncodingEnd;
@@ -225,7 +225,7 @@ export class FileBuilder {
    *
    * @param mediaType The media type string or object.
    * @returns The file, for method chaining.
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   setMediaType(mediaType: string | MediaType) {
     this.mediaType = mediaType;
@@ -235,7 +235,7 @@ export class FileBuilder {
   /**
    * The position, within the buffer, of the first payload byte.
    *
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   get payloadEncodingStart() {
     return (
@@ -246,7 +246,7 @@ export class FileBuilder {
   /**
    * The contents of the file.
    *
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   get payload(): Uint8Array {
     return this._buffer.subarray(this.payloadEncodingStart);
@@ -262,7 +262,7 @@ export class FileBuilder {
    *
    * @param payload The payload.
    * @returns The file, for method chaining.
-   * @throws {TypeError} If the file version is unsupported.
+   * @throws `TypeError` if the file version is unsupported.
    */
   setPayload(payload: ArrayLike<number> | ArrayBufferLike) {
     this.payload = payload;
@@ -276,6 +276,7 @@ export class FileBuilder {
    *
    * @template T The type of the returned codec-decoded result.
    * @param instanceID The instance ID to use when looking up available codecs.
+   * @throws `TypeError` if the file version is unsupported.
    */
   async getValue<T = unknown>(instanceID?: string) {
     return this.mediaType
@@ -292,7 +293,7 @@ export class FileBuilder {
    * @param value The value to encode and use as the file payload.
    * @param instanceID The instance ID to use when looking up available codecs.
    * @returns The file, for method chaining.
-   * @throws {TypeError} If the media type is not set.
+   * @throws `TypeError` if the file version is unsupported.
    */
   async setValue<T = unknown>(value: T, instanceID?: string) {
     if (!this.mediaType) {
