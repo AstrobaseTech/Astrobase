@@ -1,4 +1,3 @@
-import { encodeWithCodec } from '../../codec/codecs.js';
 import { FileBuilder } from '../../file/file.js';
 import { Identifier, getOne, type IdentifierSchema } from '../../identifiers/identifiers.js';
 import {
@@ -97,10 +96,9 @@ export async function saveKeyring(
     type: 'encrypt',
     value: entropy,
   };
-  const mediaType = 'application/json';
-  const fileValue = { metadata, payload: wrapConfig };
-  const filePayload = await encodeWithCodec(fileValue, mediaType);
-  const file = new FileBuilder().setPayload(filePayload).setMediaType(mediaType);
+  const file = await new FileBuilder()
+    .setMediaType('application/json')
+    .setValue({ metadata, payload: wrapConfig });
   const cid = await putImmutable(file, { instanceID: KEYRINGS_INSTANCE_ID });
   const cidB58 = cid.toBase58();
   const index = await getAvailableKeyringCIDs();

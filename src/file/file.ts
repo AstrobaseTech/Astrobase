@@ -1,5 +1,6 @@
 import type { MediaType } from 'content-type';
 import { decode, encodingLength } from 'varint';
+import { decodeWithCodec, encodeWithCodec } from '../codec/codecs.js';
 import { encodeMediaType, validateMediaType } from './media-types.js';
 
 export const SUPPORTED_FILE_VERSIONS = new Set([1]);
@@ -256,5 +257,35 @@ export class FileBuilder {
     return this;
   }
 
-  // TODO(feat): setValue
+  /**
+   * Get the decoded value of the file payload. If the media type is not set, this will always
+   * return the same as `.payload`. Otherwise, it will attempt to decode with the registered codec
+   * for the media type and return the result.
+   *
+   * @template T The type of the returned codec-decoded result.
+   * @param instanceID The instance ID to use when looking up available codecs.
+   */
+  async getValue<T = unknown>(instanceID?: string) {
+    return this.mediaType
+      ? decodeWithCodec<T>(this.payload, this.mediaType, instanceID)
+      : this.payload;
+  }
+
+  /**
+   * Sets the file payload by passing a decoded value. The media type must already be set to use
+   * this method. The value will be encoded using the codec registered for the file's media type.
+   *
+   * @template T The type of the value being provided. This may be useful for type checking when
+   *   inlining the value parameter.
+   * @param value The value to encode and use as the file payload.
+   * @param instanceID The instance ID to use when looking up available codecs.
+   * @returns The file, for method chaining.
+   * @throws {TypeError} If the media type is not set.
+   */
+  async setValue<T = unknown>(value: T, instanceID?: string) {
+    if (!this.mediaType) {
+      throw new TypeError('Cannot use `setValue` without a media type set');
+    }
+    return this.setPayload(await encodeWithCodec(value, this.mediaType, instanceID));
+  }
 }

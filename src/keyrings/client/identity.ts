@@ -1,6 +1,6 @@
 import type { MediaType } from 'content-type';
 import { queryChannelsSync } from '../../channels/channels.js';
-import { decodeWithCodec, encodeWithCodec } from '../../codec/codecs.js';
+import { decodeWithCodec } from '../../codec/codecs.js';
 import { FileBuilder } from '../../file/file.js';
 import { Identifier } from '../../identifiers/identifiers.js';
 import { Immutable, putImmutable, type PutOptions } from '../../immutable/index.js';
@@ -62,8 +62,9 @@ export async function putIdentity(
     value = await wrap({ type: 'encrypt', metadata: { pubKey }, value, mediaType });
   }
   value = await wrap({ type: 'ecdsa', metadata: pubKey, value, mediaType: 'application/json' });
-  const payload = await encodeWithCodec(value, 'application/json', options?.instanceID);
-  const file = new FileBuilder().setPayload(payload).setMediaType('application/json');
+  const file = await new FileBuilder()
+    .setMediaType('application/json')
+    .setValue(value, options?.instanceID);
   const hash = await putImmutable(file, options);
   await setAddressHash(pubKey, hash);
   return hash;

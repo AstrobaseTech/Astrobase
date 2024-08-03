@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { mockJSONCodec } from '../../test/util/codecs.js';
 import { getChannels, type ChannelDriver } from '../channels/channels.js';
-import { CodecRegistry, encodeWithCodec } from '../codec/codecs.js';
+import { CodecRegistry } from '../codec/codecs.js';
 import { FileBuilder } from '../file/file.js';
 import { Identifier, IdentifierRegistry } from '../identifiers/identifiers.js';
 import { deleteImmutable, getImmutable, putImmutable } from './operations.js';
@@ -77,9 +77,7 @@ test('Get immutable', async () => {
 test('Put immutable', async () => {
   const mediaType = 'application/json';
   const value = { test: 'test' };
-  const file = new FileBuilder()
-    .setPayload(await encodeWithCodec(value, mediaType))
-    .setMediaType(mediaType);
+  const file = await new FileBuilder().setMediaType(mediaType).setValue(value);
   let calls = 0;
   function putMock(id: Identifier, object: Uint8Array) {
     calls++;

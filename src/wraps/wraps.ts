@@ -1,5 +1,5 @@
 import type { MediaType } from 'content-type';
-import { decodeWithCodec, encodeWithCodec } from '../codec/codecs.js';
+import { decodeWithCodec } from '../codec/codecs.js';
 import { FileBuilder } from '../file/file.js';
 import { Hash, HashAlgorithm, hash } from '../immutable/index.js';
 import { Base58, Registry, type RegistryModule } from '../internal/index.js';
@@ -100,8 +100,9 @@ export async function wrap<
   instanceID?: string,
 ): Promise<WrapValue<TName, TValueMetadata>> {
   const wrap = getWrapStrategy<TConfigMetadata, TValueMetadata>(config.type, 'wrap', instanceID);
-  const filePayload = await encodeWithCodec(config.value, config.mediaType, instanceID);
-  const file = new FileBuilder().setPayload(filePayload).setMediaType(config.mediaType);
+  const file = await new FileBuilder()
+    .setMediaType(config.mediaType)
+    .setValue(config.value, instanceID);
   const fileHash = await hash(config.hashAlg ?? HashAlgorithm.SHA256, file.payload);
   const [payload, metadata] = await Promise.resolve(
     wrap({
