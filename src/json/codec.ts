@@ -3,7 +3,7 @@
  * @category API Reference
  */
 
-import type { Codec } from '../immutable/codecs.js';
+import type { Codec } from '../codec/codecs.js';
 import { getMiddlewares, type CodecMiddleware } from '../middleware/index.js';
 
 /** An JSON codec with extensible middleware system for the `application/json` media type. */

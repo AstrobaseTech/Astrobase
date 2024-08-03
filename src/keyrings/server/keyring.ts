@@ -1,6 +1,6 @@
+import { encodeWithCodec } from '../../codec/codecs.js';
 import { FileBuilder } from '../../file/file.js';
 import { Identifier, getOne, type IdentifierSchema } from '../../identifiers/identifiers.js';
-import { encodeWithCodec } from '../../immutable/codecs.js';
 import {
   Hash,
   deleteImmutable,

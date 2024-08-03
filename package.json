@@ -29,6 +29,10 @@
       "types": "./dist/channels/channels.d.ts",
       "default": "./dist/channels/channels.js"
     },
+    "./codec": {
+      "types": "./dist/codec/codecs.d.ts",
+      "default": "./dist/codec/codecs.js"
+    },
     "./file": {
       "types": "./dist/file/file.d.ts",
       "default": "./dist/file/file.js"

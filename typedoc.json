@@ -3,6 +3,7 @@
   "entryPoints": [
     "./src/channels/channels.ts",
     "./src/client/index.ts",
+    "./src/codec/codecs.ts",
     "./src/file/file.ts",
     "./src/identifiers/identifiers.ts",
     "./src/immutable/index.ts",

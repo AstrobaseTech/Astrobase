@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
 import { mockJSONCodec } from '../../test/util/codecs.js';
 import { getChannels, type ChannelDriver } from '../channels/channels.js';
+import { CodecRegistry, encodeWithCodec } from '../codec/codecs.js';
 import { FileBuilder } from '../file/file.js';
 import { Identifier, IdentifierRegistry } from '../identifiers/identifiers.js';
-import { CodecRegistry, encodeWithCodec } from './codecs.js';
-import { deleteImmutable, getImmutable, putImmutable } from './files.js';
+import { deleteImmutable, getImmutable, putImmutable } from './operations.js';
 import { Hash, HashAlgorithm } from './hashes.js';
 import { Immutable } from './schema.js';
 

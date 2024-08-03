@@ -1,7 +1,7 @@
 import type { MediaType } from 'content-type';
+import { decodeWithCodec, encodeWithCodec } from '../codec/codecs.js';
 import { FileBuilder } from '../file/file.js';
-import { encodeWithCodec } from '../immutable/codecs.js';
-import { Hash, HashAlgorithm, decodeWithCodec, hash } from '../immutable/index.js';
+import { Hash, HashAlgorithm, hash } from '../immutable/index.js';
 import { Base58, Registry, type RegistryModule } from '../internal/index.js';
 import { EncryptWrapSchema } from '../keyrings/server/wrap/encrypt.js';
 import { ECDSAWrapModule } from './ecdsa.js';

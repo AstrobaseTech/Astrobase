@@ -1,7 +1,7 @@
+import { decodeWithCodec } from '../codec/codecs.js';
 import { FileBuilder } from '../file/file.js';
 import type { IdentifierSchema } from '../identifiers/identifiers.js';
 import { validateCID } from './cid.js';
-import { decodeWithCodec } from './codecs.js';
 
 /** {@linkcode IdentifierSchema} for immutable content-addressed files. */
 export const Immutable = {

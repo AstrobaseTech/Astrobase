@@ -1,14 +1,9 @@
 import type { MediaType } from 'content-type';
 import { queryChannelsSync } from '../../channels/channels.js';
+import { decodeWithCodec, encodeWithCodec } from '../../codec/codecs.js';
 import { FileBuilder } from '../../file/file.js';
 import { Identifier } from '../../identifiers/identifiers.js';
-import {
-  Immutable,
-  decodeWithCodec,
-  encodeWithCodec,
-  putImmutable,
-  type PutOptions,
-} from '../../immutable/index.js';
+import { Immutable, putImmutable, type PutOptions } from '../../immutable/index.js';
 import { Base58 } from '../../internal/encoding.js';
 import { client } from '../../rpc/client/client.js';
 import { isWrap, wrap, type ECDSAWrappedMetadata, type WrapValue } from '../../wraps/index.js';
