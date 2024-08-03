@@ -1,10 +1,10 @@
 import type { MediaType } from 'content-type';
+import { FileBuilder } from '../file/file.js';
 import {
   Hash,
   HashAlgorithm,
   decodeWithCodec,
   hash,
-  parseFileContent,
   serializeFileContent,
 } from '../immutable/index.js';
 import { Base58, Registry, type RegistryModule } from '../internal/index.js';
@@ -145,11 +145,13 @@ export async function unwrap<
       payload: value.p,
     }),
   );
-  const [, mediaType, objectPayload] = parseFileContent(object);
-  const unwrappedValue = await decodeWithCodec(objectPayload, mediaType, instanceID);
+  const file = new FileBuilder(object);
+  const unwrappedValue = file.mediaType
+    ? await decodeWithCodec(file.payload, file.mediaType, instanceID)
+    : file.payload;
   return {
     hashAlg,
-    mediaType,
+    mediaType: file.mediaType ?? 'application/octet-stream',
     metadata: meta,
     type,
     value: unwrappedValue,

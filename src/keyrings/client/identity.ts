@@ -1,16 +1,17 @@
+import type { MediaType } from 'content-type';
 import { queryChannelsSync } from '../../channels/channels.js';
+import { FileBuilder } from '../../file/file.js';
 import { Identifier } from '../../identifiers/identifiers.js';
 import {
   Immutable,
   decodeWithCodec,
-  parseFileContent,
-  putFile,
+  encodeWithCodec,
+  putImmutable,
   type PutOptions,
 } from '../../immutable/index.js';
 import { Base58 } from '../../internal/encoding.js';
 import { client } from '../../rpc/client/client.js';
 import { isWrap, wrap, type ECDSAWrappedMetadata, type WrapValue } from '../../wraps/index.js';
-import type { MediaType } from 'content-type';
 import { getAddressHash, setAddressHash } from './address.js';
 
 // TODO: separate address hash CRUD module
@@ -26,8 +27,11 @@ export async function getIdentityValue(address: string | Uint8Array, instanceID?
       if (channel.get) {
         const objectResult = await channel.get(new Identifier(Immutable.key, hash.toBytes()));
         if (objectResult) {
-          const [, mediaType, payload] = parseFileContent(new Uint8Array(objectResult));
-          const value = await decodeWithCodec<WrapValue>(payload, mediaType, instanceID);
+          const file = new FileBuilder(objectResult);
+          if (!file.mediaType) {
+            return;
+          }
+          const value = await decodeWithCodec<WrapValue>(file.payload, file.mediaType, instanceID);
           // It must be a signature wrap that has been signed by the address
           if (
             isWrap(value) &&
@@ -63,7 +67,9 @@ export async function putIdentity(
     value = await wrap({ type: 'encrypt', metadata: { pubKey }, value, mediaType });
   }
   value = await wrap({ type: 'ecdsa', metadata: pubKey, value, mediaType: 'application/json' });
-  const hash = await putFile(value, 'application/json');
+  const payload = await encodeWithCodec(value, 'application/json', options?.instanceID);
+  const file = new FileBuilder().setPayload(payload).setMediaType('application/json');
+  const hash = await putImmutable(file, options);
   await setAddressHash(pubKey, hash);
   return hash;
 }

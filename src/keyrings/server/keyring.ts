@@ -1,5 +1,13 @@
+import { FileBuilder } from '../../file/file.js';
 import { Identifier, getOne, type IdentifierSchema } from '../../identifiers/identifiers.js';
-import { Hash, deleteFile, getFile, putFile, type CIDLike } from '../../immutable/index.js';
+import { encodeWithCodec } from '../../immutable/codecs.js';
+import {
+  Hash,
+  deleteImmutable,
+  getImmutable,
+  putImmutable,
+  type CIDLike,
+} from '../../immutable/index.js';
 import type { WrapConfig } from '../../wraps/wraps.js';
 import { KEYRINGS_INSTANCE_ID } from '../shared/constants.js';
 import type * as P from '../shared/message-payloads.js';
@@ -18,7 +26,7 @@ export const activeSeeds: Record<string, Uint8Array> = {};
 export const KeyringIndexIdentifier = {
   key: 10,
   async parse(_, v, instanceID) {
-    const index = await getFile<string[]>(v, instanceID);
+    const index = await getImmutable<string[]>(v, instanceID);
     if (index && index instanceof Array) {
       return v;
     }
@@ -50,7 +58,7 @@ export async function getAvailableKeyringCIDs(): Promise<string[]> {
     new Identifier(KeyringIndexIdentifier.key, []),
     KEYRINGS_INSTANCE_ID,
   );
-  return cid ? ((await getFile(cid, KEYRINGS_INSTANCE_ID)) ?? []) : [];
+  return cid ? ((await getImmutable(cid, KEYRINGS_INSTANCE_ID)) ?? []) : [];
 }
 
 export async function importKeyring(request: P.ImportKeyringRequest) {
@@ -65,7 +73,7 @@ export async function loadKeyring<T>(
   request: P.LoadKeyringRequest,
   instanceID?: string,
 ): Promise<T> {
-  const keyring = await getFile<PersistedKeyring<T>>(request.cid, KEYRINGS_INSTANCE_ID);
+  const keyring = await getImmutable<PersistedKeyring<T>>(request.cid, KEYRINGS_INSTANCE_ID);
   if (!keyring) {
     throw new Error('Keyring not found');
   }
@@ -83,15 +91,17 @@ export async function saveKeyring(
   metadata: unknown,
   replaceCID?: CIDLike,
 ): Promise<Hash> {
-  const payload: WrapConfig = {
+  const wrapConfig: WrapConfig = {
     mediaType: 'application/octet-stream',
     metadata: { passphrase },
     type: 'encrypt',
     value: entropy,
   };
-  const cid = await putFile({ metadata, payload }, 'application/json', {
-    instanceID: KEYRINGS_INSTANCE_ID,
-  });
+  const mediaType = 'application/json';
+  const fileValue = { metadata, payload: wrapConfig };
+  const filePayload = await encodeWithCodec(fileValue, mediaType);
+  const file = new FileBuilder().setPayload(filePayload).setMediaType(mediaType);
+  const cid = await putImmutable(file, { instanceID: KEYRINGS_INSTANCE_ID });
   const cidB58 = cid.toBase58();
   const index = await getAvailableKeyringCIDs();
   if (!index.includes(cidB58)) {
@@ -103,7 +113,7 @@ export async function saveKeyring(
    * replaceCID != cid. For now, it's not an issue as long as each cipher payload uses unique IV/salt.
    */
   if (replaceCID) {
-    void deleteFile(replaceCID, KEYRINGS_INSTANCE_ID);
+    void deleteImmutable(replaceCID, KEYRINGS_INSTANCE_ID);
   }
 
   return cid;

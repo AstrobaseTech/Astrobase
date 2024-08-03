@@ -255,4 +255,6 @@ export class FileBuilder {
     this.payload = payload;
     return this;
   }
+
+  // TODO(feat): setValue
 }

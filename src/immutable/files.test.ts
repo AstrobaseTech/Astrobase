@@ -2,14 +2,14 @@ import { format, type MediaType } from 'content-type';
 import { beforeAll, describe, expect, it, test } from 'vitest';
 import { mockJSONCodec } from '../../test/util/codecs.js';
 import { getChannels, type ChannelDriver } from '../channels/channels.js';
+import { FileBuilder } from '../file/file.js';
 import { Identifier, IdentifierRegistry } from '../identifiers/identifiers.js';
-import { CodecRegistry } from './codecs.js';
+import { CodecRegistry, encodeWithCodec } from './codecs.js';
 import {
-  deleteFile,
+  deleteImmutable,
   fileVersionIsSupported,
-  getFile,
-  parseFileContent,
-  putFile,
+  getImmutable,
+  putImmutable,
   serializeFileContent,
 } from './files.js';
 import { Hash, HashAlgorithm } from './hashes.js';
@@ -44,7 +44,7 @@ describe('File operations', () => {
         }
         mockDriverA.delete = deleteMock;
         mockDriverB.delete = deleteMock;
-        await expect(deleteFile(requestHash, instanceID)).resolves.toBeUndefined();
+        await expect(deleteImmutable(requestHash, instanceID)).resolves.toBeUndefined();
         expect(calls).toBe(2);
       });
     }
@@ -73,18 +73,21 @@ describe('File operations', () => {
     IdentifierRegistry.register({ key: Immutable.key, parse: (_, v) => v }, { instanceID });
 
     for (const cid of [existing, new Hash(existing[0], existing.subarray(1))]) {
-      await expect(getFile(cid, instanceID)).resolves.toEqual(existingCID);
+      await expect(getImmutable(cid, instanceID)).resolves.toEqual(existingCID);
     }
 
     const nonExistent = crypto.getRandomValues(new Uint8Array(16));
     for (const cid of [nonExistent, new Hash(nonExistent[0], nonExistent.subarray(1))]) {
-      await expect(getFile(cid, instanceID)).resolves.toBeUndefined();
+      await expect(getImmutable(cid, instanceID)).resolves.toBeUndefined();
     }
   });
 
   test('Put file', async () => {
-    const value = { test: 'test' };
     const mediaType = 'application/json';
+    const value = { test: 'test' };
+    const file = new FileBuilder()
+      .setPayload(await encodeWithCodec(value, mediaType))
+      .setMediaType(mediaType);
     let calls = 0;
     function putMock(id: Identifier, object: Uint8Array) {
       calls++;
@@ -93,46 +96,8 @@ describe('File operations', () => {
     }
     mockDriverA.put = putMock;
     mockDriverB.put = putMock;
-    await expect(putFile(value, mediaType, { instanceID })).resolves.toBeInstanceOf(Hash);
+    await expect(putImmutable(file, { instanceID })).resolves.toBeInstanceOf(Hash);
     expect(calls).toBe(2);
-  });
-});
-
-describe('Parse file content', () => {
-  const randomBytes = new Uint8Array(Array.from({ length: 16 }, (_, k) => k + 1));
-  const goodMediaTypeString = 'text/plain';
-  const goodMediaTypeBytes = new TextEncoder().encode(goodMediaTypeString);
-
-  it('Throws if no media type NUL terminator found', () => {
-    expect(() => parseFileContent(randomBytes)).toThrow('No NUL byte');
-  });
-
-  it('Parses supported file content', () => {
-    const version = 1;
-    const object = new Uint8Array([version, ...goodMediaTypeBytes, 0, ...randomBytes]);
-    const [v, m, p] = parseFileContent(object);
-    expect(v).toBe(version);
-    expect(m).toBe(goodMediaTypeString);
-    expect(p).toEqual(randomBytes);
-  });
-
-  it('Throws if an unknown version if encountered', () => {
-    const object = new Uint8Array([2, ...goodMediaTypeBytes, 0, ...randomBytes]);
-    expect(() => parseFileContent(object)).toThrow('Unsupported FS version');
-  });
-
-  it('Throws if a bad media type is encountered', () => {
-    const object = new Uint8Array([1, ...randomBytes, 0, ...randomBytes]);
-    expect(() => parseFileContent(object)).toThrow('Bad media type');
-  });
-
-  it('Skips validation with trusted mode enabled', () => {
-    const version = 2;
-    const object = new Uint8Array([version, ...goodMediaTypeBytes, 0, ...randomBytes]);
-    const [v, m, p] = parseFileContent(object, true);
-    expect(v).toBe(version);
-    expect(m).toBe(goodMediaTypeString);
-    expect(p).toEqual(randomBytes);
   });
 });
 

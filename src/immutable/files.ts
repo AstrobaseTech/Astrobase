@@ -1,16 +1,17 @@
 import type { MediaType } from 'content-type';
+import { FileBuilder } from '../file/file.js';
+import { encodeMediaType, validateMediaType } from '../file/media-types.js';
 import { Identifier, deleteOne, getOne, putOne } from '../identifiers/identifiers.js';
 import { cidToBytes, type CIDLike } from './cid.js';
 import { encodeWithCodec } from './codecs.js';
 import { Hash, HashAlgorithm, hash } from './hashes.js';
-import { encodeMediaType, validateMediaType } from '../file/media-types.js';
 import { Immutable } from './schema.js';
 
-export async function deleteFile(cid: CIDLike, instanceID?: string) {
+export async function deleteImmutable(cid: CIDLike, instanceID?: string) {
   return deleteOne(new Identifier(Immutable.key, cidToBytes(cid)), instanceID);
 }
 
-export async function getFile<T = unknown>(cid: CIDLike, instanceID?: string) {
+export async function getImmutable<T = unknown>(cid: CIDLike, instanceID?: string) {
   return getOne<T>(new Identifier(Immutable.key, cidToBytes(cid)), instanceID);
 }
 
@@ -19,43 +20,12 @@ export interface PutOptions {
   instanceID?: string;
 }
 
-export async function putFile(
-  value: unknown,
-  mediaType: string | MediaType,
-  options?: PutOptions,
-): Promise<Hash> {
-  const payload = await serializeFileContent(value, mediaType, { instanceID: options?.instanceID });
+export async function putImmutable(file: FileBuilder, options?: PutOptions): Promise<Hash> {
   const hashAlg = options?.hashAlg ?? HashAlgorithm.SHA256;
-  const objectHash = await hash(hashAlg, payload);
-  const id = new Identifier(Immutable.key, objectHash.toBytes());
-  await putOne(id, payload, options?.instanceID);
+  const objectHash = await hash(hashAlg, file.buffer);
+  const cid = new Identifier(Immutable.key, objectHash.toBytes());
+  await putOne(cid, file.buffer, options?.instanceID);
   return objectHash;
-}
-
-/** @deprecated A new File API is under construction */
-export type ParsedFileContent = [version: number, mediaType: string, payload: Uint8Array];
-
-/** @deprecated A new File API is under construction */
-export function parseFileContent(content: Uint8Array, trust = false): ParsedFileContent {
-  const nulIndex = content.indexOf(0, 4);
-
-  if (nulIndex === -1) {
-    throw new TypeError('No NUL byte');
-  }
-
-  const version = content[0];
-  const mediaTypeBytes = content.subarray(1, nulIndex);
-
-  if (!trust) {
-    if (!fileVersionIsSupported(version)) {
-      throw new TypeError('Unsupported FS version: ' + version);
-    }
-    if (!validateMediaType(mediaTypeBytes)) {
-      throw new TypeError('Bad media type');
-    }
-  }
-
-  return [version, new TextDecoder().decode(mediaTypeBytes), content.subarray(nulIndex + 1)];
 }
 
 /** @deprecated A new File API is under construction */
