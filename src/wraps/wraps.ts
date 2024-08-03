@@ -1,12 +1,7 @@
 import type { MediaType } from 'content-type';
 import { FileBuilder } from '../file/file.js';
-import {
-  Hash,
-  HashAlgorithm,
-  decodeWithCodec,
-  hash,
-  serializeFileContent,
-} from '../immutable/index.js';
+import { encodeWithCodec } from '../immutable/codecs.js';
+import { Hash, HashAlgorithm, decodeWithCodec, hash } from '../immutable/index.js';
 import { Base58, Registry, type RegistryModule } from '../internal/index.js';
 import { EncryptWrapSchema } from '../keyrings/server/wrap/encrypt.js';
 import { ECDSAWrapModule } from './ecdsa.js';
@@ -105,20 +100,19 @@ export async function wrap<
   instanceID?: string,
 ): Promise<WrapValue<TName, TValueMetadata>> {
   const wrap = getWrapStrategy<TConfigMetadata, TValueMetadata>(config.type, 'wrap', instanceID);
-  const unwrappedPayload = await serializeFileContent(config.value, config.mediaType, {
-    instanceID,
-  });
-  const unwrappedHash = await hash(config.hashAlg ?? HashAlgorithm.SHA256, unwrappedPayload);
+  const filePayload = await encodeWithCodec(config.value, config.mediaType, instanceID);
+  const file = new FileBuilder().setPayload(filePayload).setMediaType(config.mediaType);
+  const fileHash = await hash(config.hashAlg ?? HashAlgorithm.SHA256, file.payload);
   const [payload, metadata] = await Promise.resolve(
     wrap({
-      hash: unwrappedHash,
+      hash: fileHash,
       metadata: config.metadata,
-      payload: unwrappedPayload,
+      payload: file.payload,
     }),
   );
   return {
     $: `wrap:${config.type}`,
-    h: unwrappedHash.toBase58(),
+    h: fileHash.toBase58(),
     m: metadata,
     p: payload,
     v: 1,
