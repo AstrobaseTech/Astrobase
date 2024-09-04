@@ -1,0 +1,32 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "./src/channels/index.ts",
+    "./src/codec/codecs.ts",
+    "./src/encoding/index.ts",
+    "./src/file/index.ts",
+    "./src/identifiers/identifiers.ts",
+    "./src/immutable/index.ts",
+    "./src/indexeddb/indexeddb.ts",
+    "./src/internal/index.ts",
+    "./src/json/codec.ts",
+    "./src/middleware/index.ts",
+    "./src/registry/index.ts",
+    "./src/s3/s3.ts"
+  ],
+  "hideGenerator": true,
+  "includeVersion": true,
+  "name": "Astrobase JS SDK",
+  "navigation": {
+    "includeCategories": true,
+    "includeFolders": false,
+    "includeGroups": false
+  },
+  "navigationLinks": {
+    "Website": "/",
+    "GitHub": "https://github.com/AstrobaseTech/Astrobase"
+  },
+  "out": "docs",
+  "sort": ["instance-first", "alphabetical"],
+  "sourceLinkExternal": true
+}
