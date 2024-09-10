@@ -20,7 +20,7 @@ export const MEDIA_TYPE_BITMASK = 0b01000000;
  * Represents a File buffer loaded into memory and contains getters that parse the buffer to
  * retrieve values.
  */
-export class File {
+export class File<T = unknown> {
   private _buffer: Uint8Array;
 
   constructor(fileBuffer: ArrayLike<number> | ArrayBufferLike = [DEFAULT_FILE_VERSION, 0]) {
@@ -251,7 +251,7 @@ export class File {
    * @param instanceID The instance ID to use when looking up available codecs.
    * @throws `TypeError` if the file version is unsupported.
    */
-  async getValue<T = unknown>(instanceID?: string) {
+  async getValue(instanceID?: string) {
     return this.mediaType
       ? decodeWithCodec<T>(this.payload, this.mediaType.value, instanceID)
       : this.payload;
@@ -268,7 +268,7 @@ export class File {
    * @returns The file, for method chaining.
    * @throws `TypeError` if the file version is unsupported.
    */
-  async setValue<T = unknown>(value: T, instanceID?: string) {
+  async setValue(value: T, instanceID?: string) {
     if (!this.mediaType) {
       throw new TypeError('Cannot use `setValue` without a media type set');
     }

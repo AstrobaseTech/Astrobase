@@ -1,104 +1,104 @@
-/**
- * Identifier schemas tell the engine how to handle the different types of data that enter the
- * engine by providing validation and serialization. They deal with binary content and allow for
- * higher level protocols and abstractions to be built on top.
- *
- * @module Identifiers
- */
+/** @module Content Identifiers */
 
-import { decode, encode, encodingLength } from 'varint';
 import { queryChannelsAsync, queryChannelsSync } from '../channels/channels.js';
+import { Varint } from '../encoding/varint.js';
 import { Immutable } from '../immutable/schema.js';
 import { Base58, type MaybePromise } from '../internal/index.js';
 import { Registry, type RegistryModule } from '../registry/registry.js';
 
 /**
- * This interface describes an identifier type and how the application should handle those
- * identifiers and associated values as they come into the engine and out through channels.
+ * A valid content identifier value. When a string is used, it must be base58 encoded.
  *
- * @category Identifiers
+ * @category Content Identifiers
  */
-export interface IdentifierSchema<T = unknown> extends RegistryModule<number> {
+export type ContentIdentifierLike =
+  | ArrayLike<number>
+  | ArrayBufferLike
+  | string
+  | ContentIdentifier;
+
+/**
+ * Describes a content identifier scheme and defines its handlers.
+ *
+ * @category Content Identifiers
+ * @template T The type returned by the parse function.
+ */
+export interface ContentIdentifierScheme<T> extends RegistryModule<number> {
   /**
-   * Defines a function that takes a identifier/value pair, validates it, and then returns a parsed
-   * value. It can be asynchronous and return a promise.
+   * Defines a function that takes a identifier/content pair, validates it, and then returns a
+   * parsed value. This function can be asynchronous and return a promise.
    *
    * @param identifier The Identifier.
-   * @param value The value as bytes.
+   * @param content The value as bytes.
    * @param instanceID The ID of the instance where the function was called.
    * @returns The parsed value or, if performing some validation which fails, return `void`.
    */
-  parse(identifier: Identifier, value: Uint8Array, instanceID?: string): MaybePromise<T | void>;
+  parse(
+    identifier: ContentIdentifier,
+    content: Uint8Array,
+    instanceID?: string,
+  ): MaybePromise<T | void>;
 }
 
 /**
- * This class represents an Identifier and implements methods for parsing and encoding it.
+ * Represents a content identifier and implements methods for parsing and encoding it.
  *
- * Identifiers are keys, such as CIDs, which are used to identify and lookup content. Many times the
- * identifier is not arbitrary and has some form of connection with the content - for instance a CID
- * type identifier contains a hash derived from the content.
+ * Content identifiers are the keys used to identify and lookup content. Rather than being
+ * arbitrary, the content identifier usually has some form of connection with the content - for
+ * instance the content identifier for immutable content includes a hash derived from the content,
+ * which is used in consensus validation.
  *
- * Identifiers are made up of a type integer, serialized as a varint, followed by the identifier
- * value, which will vary per type.
+ * Content identifiers are made up of a type integer, serialized as a varint, followed by the value
+ * itself, which will vary per type.
  *
- * ```text
- * +------+-------+
- * | type | value |
- * +------+-------+
- * ```
+ * When presenting a content identifier in human-readable form, we use base58 encoding.
  *
- * When presenting an Identifier in human-readable form, we use base58 encoding.
+ * @category Content Identifiers
  */
-export class Identifier {
-  /** The full encoded bytes of the Identifier. */
-  readonly bytes: Uint8Array;
+export class ContentIdentifier {
+  /** The full bytes. */
+  public bytes: Uint8Array;
 
-  constructor(type: number, value: ArrayLike<number> | ArrayBufferLike);
-  constructor(identifier: ArrayLike<number> | ArrayBufferLike | string | Identifier);
   constructor(
-    arg1: ArrayLike<number> | ArrayBufferLike | number | string | Identifier,
-    arg2?: ArrayLike<number> | ArrayBufferLike,
+    /** A valid content identifier. When a string is used, it must be base58 encoded. */
+    identifier: ContentIdentifierLike,
   ) {
-    switch (typeof arg1) {
-      case 'number':
-        this.bytes = new Uint8Array([...encode(arg1), ...new Uint8Array(arg2!)]);
-        break;
-      case 'string':
-        this.bytes = new Uint8Array(Base58.decode(arg1));
-        break;
-      default:
-        this.bytes = arg1 instanceof Identifier ? arg1.bytes : new Uint8Array(arg1);
-    }
+    this.bytes =
+      identifier instanceof ContentIdentifier
+        ? identifier.bytes
+        : typeof identifier === 'string'
+          ? Base58.decode(identifier)
+          : new Uint8Array(identifier);
   }
 
-  /** The type integer of the Identifier. */
+  /** The type integer. */
   get type() {
-    return decode(this.bytes);
+    return new Varint(this.bytes);
   }
 
-  /** The value of the Identifier. */
-  get value() {
-    return this.bytes.subarray(encodingLength(this.type));
+  /** The value as bytes. */
+  get rawValue() {
+    return this.bytes.subarray(this.type.encodingLength);
   }
 
-  /** Gets the Identifier encoded as human-readable base58 string. */
+  /** Gets a version encoded as human-readable base58 string. */
   toBase58() {
     return Base58.encode(this.bytes);
   }
 
-  /** Gets a string representation of the Identifier that the binary middleware can parse. */
+  /** Alias for `toBase58`. */
   toString() {
-    return `$ref:b58:${this.toBase58()}`;
+    return this.toBase58();
   }
 }
 
 /**
- * A {@linkcode Registry} for storing {@linkcode IdentifierSchema} instances and associating them with
- * a type integer.
+ * A {@linkcode Registry} for storing {@linkcode ContentIdentifierScheme} instances and associating
+ * them with a type integer.
  *
- * @category Identifiers
+ * @category Content Identifiers
  */
-export const IdentifierRegistry = new Registry<number, IdentifierSchema>({
+export const IdentifierRegistry = new Registry<number, ContentIdentifierScheme<unknown>>({
   defaults: { 1: Immutable },
   validateKey: (key) => Number.isInteger(key),
   validateModule: (value) => typeof value.parse === 'function',
@@ -112,16 +112,13 @@ export const IdentifierRegistry = new Registry<number, IdentifierSchema>({
  * @param instanceID The target instance ID where the channels to query are registered.
  * @returns A promise that resolves when all requests have completed.
  */
-export async function deleteOne(
-  id: ArrayLike<number> | ArrayBufferLike | string | Identifier,
-  instanceID?: string,
-) {
-  await queryChannelsAsync((channel) => channel.delete?.(new Identifier(id)), instanceID);
+export async function deleteOne(id: ContentIdentifierLike, instanceID?: string) {
+  await queryChannelsAsync((channel) => channel.delete?.(new ContentIdentifier(id)), instanceID);
 }
 
 /**
  * Queries the registered channels synchronously, and channel groups asynchronously, until we
- * receive a value that passes the {@linkcode IdentifierSchema} validation and parsing. If all
+ * receive a value that passes the {@linkcode ContentIdentifierScheme} validation and parsing. If all
  * channels are queried with no successful result, returns `void`.
  *
  * @category Repository
@@ -129,16 +126,16 @@ export async function deleteOne(
  * @param instanceID The target instance ID where the channels to query are registered.
  * @returns The value or `void` if no valid value was retrieved.
  */
-export function getOne<T>(
-  id: ArrayLike<number> | ArrayBufferLike | string | Identifier,
-  instanceID?: string,
-) {
-  id = new Identifier(id);
-  const schema = IdentifierRegistry.getStrict(id.type, instanceID) as IdentifierSchema<T>;
+export function getOne<T>(id: ContentIdentifierLike, instanceID?: string) {
+  id = new ContentIdentifier(id);
+  const scheme = IdentifierRegistry.getStrict(
+    id.type.value,
+    instanceID,
+  ) as ContentIdentifierScheme<T>;
   return queryChannelsSync(async (channel) => {
     const content = await channel.get?.(id);
     if (content) {
-      return await Promise.resolve(schema.parse(id, new Uint8Array(content), instanceID));
+      return await Promise.resolve(scheme.parse(id, new Uint8Array(content), instanceID));
     }
   }, instanceID);
 }
@@ -154,13 +151,13 @@ export function getOne<T>(
  * @returns A promise that resolves when all requests have completed.
  */
 export async function putOne(
-  id: ArrayLike<number> | ArrayBufferLike | string | Identifier,
+  id: ContentIdentifierLike,
   value: ArrayLike<number> | ArrayBufferLike,
   instanceID?: string,
 ) {
-  id = new Identifier(id);
+  id = new ContentIdentifier(id);
   value = new Uint8Array(value);
-  const identifierSchema = IdentifierRegistry.getStrict(id.type, instanceID);
+  const identifierSchema = IdentifierRegistry.getStrict(id.type.value, instanceID);
   if (!(await Promise.resolve(identifierSchema.parse(id, value as Uint8Array, instanceID)))) {
     throw new Error('Invalid value');
   }

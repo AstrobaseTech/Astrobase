@@ -1,11 +1,14 @@
 import { describe, expect, test } from 'vitest';
-import { Base58 } from '../internal/index.js';
 import { RegistryError } from '../registry/registry.js';
-import { Identifier, IdentifierRegistry, type IdentifierSchema } from './identifiers.js';
+import {
+  ContentIdentifier,
+  IdentifierRegistry,
+  type ContentIdentifierScheme,
+} from './identifiers.js';
 
 describe('Identifier Registry', () => {
   const instanceID = 'Identifier Registry';
-  const parse: IdentifierSchema['parse'] = (_, v) => v;
+  const parse: ContentIdentifierScheme<unknown>['parse'] = (_, v) => v;
 
   test('Key validation', () => {
     for (const key of [0, 2]) {
@@ -42,15 +45,15 @@ test('Identifier class', () => {
       b58: 'TBJiAGb',
     },
   ]) {
-    for (const id of [new Identifier(type, value), new Identifier(bytes), new Identifier(b58)]) {
+    for (const id of [new ContentIdentifier(bytes), new ContentIdentifier(b58)]) {
       for (const i in id.bytes) {
         expect(id.bytes[i]).toBe(bytes[i]);
       }
-      expect(id.type).toBe(type);
-      for (const i in id.value) {
-        expect(id.value[i]).toBe(value[i]);
+      expect(id.type.value).toBe(type);
+      for (const i in id.rawValue) {
+        expect(id.rawValue[i]).toBe(value[i]);
       }
-      expect(id.toBase58()).toEqual(Base58.encode(new Uint8Array(bytes)));
+      expect(id.toBase58()).toEqual(b58);
     }
   }
 });

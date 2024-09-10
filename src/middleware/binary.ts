@@ -1,4 +1,4 @@
-import { Identifier } from '../identifiers/identifiers.js';
+import { ContentIdentifier } from '../identifiers/identifiers.js';
 import { Base58, Base64, type BaseEncoder } from '../internal/encoding.js';
 import type { CodecMiddleware } from './types.js';
 
@@ -61,6 +61,6 @@ export const BinaryMiddleware = {
 
     const decoded = encoder.decode(value.slice(9));
 
-    return isRef ? new Identifier(decoded) : decoded;
+    return isRef ? new ContentIdentifier(decoded) : decoded;
   },
 } satisfies CodecMiddleware;

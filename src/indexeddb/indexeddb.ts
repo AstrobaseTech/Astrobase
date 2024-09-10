@@ -15,7 +15,7 @@
  */
 
 import type { Channel } from '../channels/channel.interface.js';
-import type { Identifier } from '../identifiers/identifiers.js';
+import type { ContentIdentifier } from '../identifiers/identifiers.js';
 
 /**
  * Configuration object for the IndexedDB channel driver.
@@ -88,7 +88,7 @@ export class IndexeddbDriver implements Channel {
     readonly tableName: string,
   ) {}
 
-  delete(id: Identifier): Promise<void> {
+  delete(id: ContentIdentifier): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = this.db
         .transaction(this.tableName, 'readwrite')
@@ -99,7 +99,7 @@ export class IndexeddbDriver implements Channel {
     });
   }
 
-  get<T>(id: Identifier): Promise<T | void> {
+  get<T>(id: ContentIdentifier): Promise<T | void> {
     return new Promise((resolve, reject) => {
       const request = this.db
         .transaction(this.tableName, 'readonly')
@@ -110,7 +110,7 @@ export class IndexeddbDriver implements Channel {
     });
   }
 
-  put(id: Identifier, value: Uint8Array): Promise<void> {
+  put(id: ContentIdentifier, value: Uint8Array): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = this.db
         .transaction(this.tableName, 'readwrite')

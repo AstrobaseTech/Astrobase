@@ -1,7 +1,7 @@
 import { File } from '../file/file.js';
-import { Identifier, deleteOne, getOne, putOne } from '../identifiers/identifiers.js';
+import { ContentIdentifier, deleteOne, getOne, putOne } from '../identifiers/identifiers.js';
 import { cidToBytes, type CIDLike } from './cid.js';
-import { Hash, HashAlgorithm, hash } from './hashes.js';
+import { HashAlgorithm, hash } from './hashes.js';
 import { Immutable } from './schema.js';
 
 /**
@@ -12,7 +12,7 @@ import { Immutable } from './schema.js';
  * @returns A promise that resolves when all requests have completed.
  */
 export async function deleteImmutable(cid: CIDLike, instanceID?: string) {
-  return deleteOne(new Identifier(Immutable.key, cidToBytes(cid)), instanceID);
+  return deleteOne(new ContentIdentifier([Immutable.key, ...cidToBytes(cid)]), instanceID);
 }
 
 /**
@@ -26,7 +26,7 @@ export async function deleteImmutable(cid: CIDLike, instanceID?: string) {
  *   retrieved.
  */
 export async function getImmutable<T = unknown>(cid: CIDLike, instanceID?: string) {
-  return getOne<T>(new Identifier(Immutable.key, cidToBytes(cid)), instanceID);
+  return getOne<File<T>>(new ContentIdentifier([Immutable.key, ...cidToBytes(cid)]), instanceID);
 }
 
 /** Additional options for `putImmutable`. */
@@ -42,12 +42,12 @@ export interface PutOptions {
  *
  * @param file A {@linkcode File} instance to save.
  * @param options Additional {@linkcode PutOptions}.
- * @returns A promise that resolves with the immutable content {@linkcode Hash}.
+ * @returns A promise that resolves with the {@linkcode ContentIdentifier}.
  */
-export async function putImmutable(file: File, options?: PutOptions): Promise<Hash> {
+export async function putImmutable(file: File, options?: PutOptions) {
   const hashAlg = options?.hashAlg ?? HashAlgorithm.SHA256;
   const objectHash = await hash(hashAlg, file.buffer);
-  const cid = new Identifier(Immutable.key, objectHash.toBytes());
+  const cid = new ContentIdentifier([Immutable.key, ...objectHash.bytes]);
   await putOne(cid, file.buffer, options?.instanceID);
-  return objectHash;
+  return cid;
 }

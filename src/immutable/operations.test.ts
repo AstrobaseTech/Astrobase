@@ -3,7 +3,7 @@ import { mockJSONCodec } from '../../test/util/codecs.js';
 import { getChannels, type Channel } from '../channels/index.js';
 import { CodecRegistry } from '../codec/codecs.js';
 import { File } from '../file/file.js';
-import { Identifier, IdentifierRegistry } from '../identifiers/identifiers.js';
+import { ContentIdentifier, IdentifierRegistry } from '../identifiers/identifiers.js';
 import { deleteImmutable, getImmutable, putImmutable } from './operations.js';
 import { Hash, HashAlgorithm } from './hashes.js';
 import { Immutable } from './schema.js';
@@ -22,17 +22,17 @@ function createHash() {
 }
 
 describe('Delete immutable', () => {
-  const baseHash = new Hash(HashAlgorithm.SHA256, createHash());
+  const baseHash = new Hash([HashAlgorithm.SHA256, ...createHash()]);
   const testCases = [
-    ['Uint8Array', baseHash.toBytes()],
+    ['Uint8Array', baseHash.bytes],
     ['Hash', baseHash],
   ] as const;
   for (const [paramType, requestHash] of testCases) {
     test('With ' + paramType, async () => {
       let calls = 0;
-      function deleteMock(id: Identifier) {
+      function deleteMock(id: ContentIdentifier) {
         calls++;
-        expect(id.value).toEqual(baseHash.toBytes());
+        expect(id.rawValue).toEqual(baseHash.bytes);
       }
       mockDriverA.delete = deleteMock;
       mockDriverB.delete = deleteMock;
@@ -64,12 +64,12 @@ test('Get immutable', async () => {
 
   IdentifierRegistry.register({ key: Immutable.key, parse: (_, v) => v }, { instanceID });
 
-  for (const cid of [existing, new Hash(existing[0], existing.subarray(1))]) {
+  for (const cid of [existing, new Hash(existing)]) {
     await expect(getImmutable(cid, instanceID)).resolves.toEqual(existingCID);
   }
 
   const nonExistent = crypto.getRandomValues(new Uint8Array(16));
-  for (const cid of [nonExistent, new Hash(nonExistent[0], nonExistent.subarray(1))]) {
+  for (const cid of [nonExistent, new Hash(nonExistent)]) {
     await expect(getImmutable(cid, instanceID)).resolves.toBeUndefined();
   }
 });
@@ -79,13 +79,13 @@ test('Put immutable', async () => {
   const value = { test: 'test' };
   const file = await new File().setMediaType(mediaType).setValue(value);
   let calls = 0;
-  function putMock(id: Identifier, object: Uint8Array) {
+  function putMock(id: ContentIdentifier, object: Uint8Array) {
     calls++;
-    expect(id.value).toBeInstanceOf(Uint8Array);
+    expect(id.rawValue).toBeInstanceOf(Uint8Array);
     expect(object).toBeInstanceOf(Uint8Array);
   }
   mockDriverA.put = putMock;
   mockDriverB.put = putMock;
-  await expect(putImmutable(file, { instanceID })).resolves.toBeInstanceOf(Hash);
+  await expect(putImmutable(file, { instanceID })).resolves.toBeInstanceOf(ContentIdentifier);
   expect(calls).toBe(2);
 });

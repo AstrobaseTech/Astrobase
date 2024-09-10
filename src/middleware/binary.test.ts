@@ -1,11 +1,11 @@
 import { describe, expect, it, test } from 'vitest';
 import { encodes } from '../../test/util/encodes.js';
-import { Identifier } from '../identifiers/identifiers.js';
+import { ContentIdentifier } from '../identifiers/identifiers.js';
 import { BinaryMiddleware } from './binary.js';
 
 describe('JSON codec binary middleware', () => {
   for (const [ascii, bin, b58, b64] of encodes) {
-    const identifier = new Identifier(bin);
+    const identifier = new ContentIdentifier(bin);
 
     const bin58 = `$bin:b58:${b58}`;
     const bin64 = `$bin:b64:${b64}`;

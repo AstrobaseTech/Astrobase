@@ -224,7 +224,7 @@ export class Registry<K extends RegistryKey, T extends RegistryModule<K>> {
    * instance (see {@linkcode Registry} and {@linkcode RegisterOptions}).
    *
    * @param module A module to register.
-   * @param options An optional {@linkcode RegistrationOptions} object.
+   * @param options An optional {@linkcode RegisterOptions} object.
    */
   register(module: T, options?: RegisterOptions<K>) {
     if (this.options?.validateModule && !this.options.validateModule(module)) {

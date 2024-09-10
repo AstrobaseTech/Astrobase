@@ -6,7 +6,7 @@ import {
   fakeVoidDriver,
 } from '../../test/util/drivers.js';
 import { resolveBeforeTimeout } from '../../test/util/utils.js';
-import { Identifier } from '../identifiers/identifiers.js';
+import { ContentIdentifier } from '../identifiers/identifiers.js';
 import { getChannels, queryChannelsSync, type Channels, type ChannelQuery } from './channels.js';
 import type { Channel } from './channel.interface.js';
 
@@ -19,7 +19,7 @@ test('getChannels', () => {
 
 describe('Query channels sync', () => {
   function normalQuery(channel: Channel) {
-    return channel.get!(new Identifier([]));
+    return channel.get!(new ContentIdentifier([]));
   }
 
   function throwQuery() {
@@ -30,7 +30,7 @@ describe('Query channels sync', () => {
     const instanceID = 'query-channels-sync-resolve-first';
     getChannels(instanceID).push(fakeDelayedDriver, fakeValidDriver);
     const query = (channel: Channel) => {
-      if (channel.get!(new Identifier([]))) {
+      if (channel.get!(new ContentIdentifier([]))) {
         return 0;
       }
     };

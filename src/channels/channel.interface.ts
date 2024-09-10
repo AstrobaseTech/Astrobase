@@ -1,4 +1,4 @@
-import type { Identifier } from '../identifiers/identifiers.js';
+import type { ContentIdentifier } from '../identifiers/identifiers.js';
 import type { MaybePromise } from '../internal/index.js';
 
 /**
@@ -9,26 +9,29 @@ export interface Channel {
   /**
    * A function that handles a delete request.
    *
-   * @param id The {@linkcode Identifier} of the value requested to be deleted.
+   * @param id The {@linkcode ContentIdentifier} of the content requested to be deleted.
    * @returns `void`, but if the function is asynchronous it should return a promise that resolves
    *   once the action has been completed.
    */
-  delete?(id: Identifier): MaybePromise<void>;
+  delete?(id: ContentIdentifier): MaybePromise<void>;
+
   /**
    * A function that handles a get request.
    *
-   * @param id The identifier of the requested value.
-   * @returns The value or a promise that resolves with the value. If the value cannot be retrieved
-   *   becuase it doesn't exist or for some other reason, we should return `void` instead.
+   * @param id The {@linkcode ContentIdentifier} of the requested content.
+   * @returns The content or a promise that resolves with the content. If the content cannot be
+   *   retrieved becuase it doesn't exist or for some other reason, we should return `void`
+   *   instead.
    */
-  get?(id: Identifier): MaybePromise<ArrayLike<number> | ArrayBufferLike | void>;
+  get?(id: ContentIdentifier): MaybePromise<ArrayLike<number> | ArrayBufferLike | void>;
+
   /**
-   * A function that handles a put request (to store an identifier/value pair).
+   * A function that handles a put request (to store an identifier/content pair).
    *
-   * @param id The identifier.
-   * @param value The value.
+   * @param id The {@linkcode ContentIdentifier}.
+   * @param content The content.
    * @returns `void`, but if the function is asynchronous it should return a promise that resolves
    *   once the action has been completed.
    */
-  put?(id: Identifier, value: Uint8Array): MaybePromise<void>;
+  put?(id: ContentIdentifier, content: Uint8Array): MaybePromise<void>;
 }

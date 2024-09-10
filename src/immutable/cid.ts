@@ -16,7 +16,7 @@ export type CIDLike = ArrayLike<number> | ArrayBufferLike | Hash | string;
  * @returns A `Uint8Array`.
  */
 export function cidToBytes(cid: CIDLike) {
-  return cid instanceof Hash ? cid.toBytes() : identifierToBytes(cid);
+  return cid instanceof Hash ? cid.bytes : identifierToBytes(cid);
 }
 
 /**

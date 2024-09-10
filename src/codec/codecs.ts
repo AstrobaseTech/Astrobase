@@ -26,7 +26,7 @@ export interface CodecProps {
  * content types). They may additionally perform validation and throw an error where the content is
  * corrupt or otherwise unacceptable.
  *
- * The codec system is primarily used by the {@linkcode File} protocol.
+ * The codec system is primarily used by the File protocol.
  *
  * @category Interfaces
  */

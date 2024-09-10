@@ -1,6 +1,6 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { expect, test } from 'vitest';
-import { Identifier } from '../identifiers/identifiers.js';
+import { ContentIdentifier } from '../identifiers/identifiers.js';
 import { S3Driver } from './s3.js';
 
 test('S3 Driver', async () => {
@@ -26,7 +26,7 @@ test('S3 Driver', async () => {
     const driver = S3Driver(s3, BUCKET);
 
     const body = new TextEncoder().encode('test');
-    const id = new Identifier(0, body);
+    const id = new ContentIdentifier([0, ...body]);
     await expect(driver.put(id, body)).resolves.toBeUndefined();
     await expect(driver.get(id)).resolves.toEqual(body);
     await expect(driver.delete(id)).resolves.toBeUndefined();

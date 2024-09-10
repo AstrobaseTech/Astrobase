@@ -1,6 +1,29 @@
 # Changelog
 
-## [0.2.0](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.1.0) - 2024-09-04
+## [0.3.0](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.3.0) - 2024-09-10
+
+### Added
+
+- Added `ContentIdentifierLike` convenience type.
+
+### Changed
+
+- Renamed `IdentiferSchema` to `ContentIdentifierScheme`.
+- Replaced `Identifier` with `ContentIdentifier`.
+  - The constructor now accepts only a single argument.
+  - `.type` now returns a `Varint` parser.
+  - `.value` is now `.rawvalue`.
+  - `.toString` is now an alias of `.toBase58`
+- Changed `Hash`:
+  - The constructor now accepts only a single argument.
+  - Replaced `toBytes()` with `.bytes`.
+  - `.algorithm` now returns a `Varint` parser.
+- `File` is now generic and accepts the type argument. The `getValue` & `setValue` no longer need a type argument.
+- Immutable scheme now parses and returns a `File` instance.
+- `getImmutable` now returns a `File` instance.
+- `putImmutable` now returns a `ContentIdentifier` instead of `Hash`.
+
+## [0.2.0](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.2.0) - 2024-09-04
 
 :seedling: Initial release as Astrobase.
 

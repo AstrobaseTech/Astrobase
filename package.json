@@ -1,6 +1,6 @@
 {
   "name": "@astrobase/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "An extensible protocol suite for building multi-user apps with native privacy, security, and self-sovereignty.",
   "keywords": [
     "astrobase",
@@ -76,7 +76,7 @@
     "@typescript-eslint/eslint-plugin": "^7.14.0",
     "@typescript-eslint/parser": "^7.14.0",
     "@vitest/coverage-v8": "^2.0.0",
-    "concurrently": "^8.0.0",
+    "concurrently": "9.0.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-deprecation": "^3.0.0",
@@ -88,7 +88,7 @@
     "publint": "~0.2.0",
     "sort-package-json": "~2.10.0",
     "typedoc": "~0.26.0",
-    "typescript": "~5.5.0",
+    "typescript": "~5.6.2",
     "vitest": "^2.0.0"
   },
   "peerDependencies": {
