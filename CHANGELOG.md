@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.1](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.3.1) - 2024-09-11
+
+### Added
+
+- Added experimental (untested) support for the mutable `ContentIdentifierScheme`.
+
+### Changed
+
+- Renamed `IdentifierRegistry` to `SchemeRegistry`. `IdentifierRegistry` still works, but is deprecated.
+
+### Deprecated
+
+- Deprecated usage of `getImmutable` without passing a type parameter.
+- Deprecated `IdentifierRegistry` in favour of `SchemeRegistry`.
+
 ## [0.3.0](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.3.0) - 2024-09-10
 
 ### Added
@@ -12,13 +27,13 @@
 - Replaced `Identifier` with `ContentIdentifier`.
   - The constructor now accepts only a single argument.
   - `.type` now returns a `Varint` parser.
-  - `.value` is now `.rawvalue`.
-  - `.toString` is now an alias of `.toBase58`
+  - `.value` is now `.rawValue`.
+  - `.toString` is now an alias of `.toBase58`.
 - Changed `Hash`:
   - The constructor now accepts only a single argument.
   - Replaced `toBytes()` with `.bytes`.
   - `.algorithm` now returns a `Varint` parser.
-- `File` is now generic and accepts the type argument. The `getValue` & `setValue` no longer need a type argument.
+- `File` is now generic and accepts the type argument. The `getValue` & `setValue` methods no longer need a type argument.
 - Immutable scheme now parses and returns a `File` instance.
 - `getImmutable` now returns a `File` instance.
 - `putImmutable` now returns a `ContentIdentifier` instead of `Hash`.

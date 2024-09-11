@@ -11,6 +11,7 @@
     "./src/internal/index.ts",
     "./src/json/codec.ts",
     "./src/middleware/index.ts",
+    "./src/mutable/index.ts",
     "./src/registry/index.ts",
     "./src/s3/s3.ts"
   ],

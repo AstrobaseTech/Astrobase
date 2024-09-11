@@ -1,10 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { RegistryError } from '../registry/registry.js';
-import {
-  ContentIdentifier,
-  IdentifierRegistry,
-  type ContentIdentifierScheme,
-} from './identifiers.js';
+import { ContentIdentifier, SchemeRegistry, type ContentIdentifierScheme } from './identifiers.js';
 
 describe('Identifier Registry', () => {
   const instanceID = 'Identifier Registry';
@@ -12,21 +8,17 @@ describe('Identifier Registry', () => {
 
   test('Key validation', () => {
     for (const key of [0, 2]) {
-      expect(IdentifierRegistry.register({ key, parse }, { instanceID })).toBeUndefined();
+      expect(SchemeRegistry.register({ key, parse }, { instanceID })).toBeUndefined();
     }
     for (const key of [2.1, '2.1', '2'] as never[]) {
-      expect(() => IdentifierRegistry.register({ key, parse }, { instanceID })).toThrow(
-        RegistryError,
-      );
+      expect(() => SchemeRegistry.register({ key, parse }, { instanceID })).toThrow(RegistryError);
     }
   });
 
   test('Value validation', () => {
-    expect(IdentifierRegistry.register({ key: 3, parse })).toBeUndefined();
-    expect(() => IdentifierRegistry.register({ key: 4 } as never)).toThrow(RegistryError);
-    expect(() => IdentifierRegistry.register({ key: 4, parse: '' } as never)).toThrow(
-      RegistryError,
-    );
+    expect(SchemeRegistry.register({ key: 3, parse })).toBeUndefined();
+    expect(() => SchemeRegistry.register({ key: 4 } as never)).toThrow(RegistryError);
+    expect(() => SchemeRegistry.register({ key: 4, parse: '' } as never)).toThrow(RegistryError);
   });
 });
 

@@ -1,4 +1,4 @@
-import { Varint } from '../core.js';
+import { Varint } from '../encoding/varint.js';
 import { Base58 } from '../internal/encoding.js';
 import type { CIDLike } from './cid.js';
 

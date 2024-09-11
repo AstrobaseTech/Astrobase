@@ -2,12 +2,13 @@ import { File } from '../file/file.js';
 import { ContentIdentifier, deleteOne, getOne, putOne } from '../identifiers/identifiers.js';
 import { cidToBytes, type CIDLike } from './cid.js';
 import { HashAlgorithm, hash } from './hashes.js';
-import { Immutable } from './schema.js';
+import { Immutable } from './scheme.js';
 
 /**
- * Sends a request to delete an item of immutable data to all registered channels asynchronously.
+ * Sends a request, to all registered channels asynchronously, to delete an item of immutable
+ * content.
  *
- * @param cid A {@linkcode CIDLike} value of the ID of the item to delete.
+ * @param cid A valid {@linkcode CIDLike} of the {@linkcode File} to delete.
  * @param instanceID The instance to delete from.
  * @returns A promise that resolves when all requests have completed.
  */
@@ -15,14 +16,17 @@ export async function deleteImmutable(cid: CIDLike, instanceID?: string) {
   return deleteOne(new ContentIdentifier([Immutable.key, ...cidToBytes(cid)]), instanceID);
 }
 
+/** @deprecated In future it will be required to provide a `T` type param. */
+export async function getImmutable(cid: CIDLike, instanceID?: string): Promise<File<unknown>>;
+export async function getImmutable<T>(cid: CIDLike, instanceID?: string): Promise<File<T>>;
 /**
- * Queries registered channels to retrieve an item of immutable data. If all channels are queried
+ * Queries registered channels to retrieve an immutable {@linkcode File}. If all channels are queried
  * with no successful result, returns `void`.
  *
- * @template T The type of the item's content after successful decoding.
- * @param cid A {@linkcode CIDLike} value of the ID of the item to retrieve.
+ * @template T The type of the {@linkcode File} content after successful decoding.
+ * @param cid A valid {@linkcode CIDLike} of the {@linkcode File} to retrieve.
  * @param instanceID The instance to retrieve from.
- * @returns A promise that resolves with the value of the item, or `void` if no valid value was
+ * @returns A promise that resolves with the decoded content, or `void` if nothing valid was
  *   retrieved.
  */
 export async function getImmutable<T = unknown>(cid: CIDLike, instanceID?: string) {
@@ -38,7 +42,7 @@ export interface PutOptions {
 }
 
 /**
- * Sends a request to save an item of immutable data to all registered channels asynchronously.
+ * Sends a request, to all registered channels asynchronously, to save an item of immutable content.
  *
  * @param file A {@linkcode File} instance to save.
  * @param options Additional {@linkcode PutOptions}.

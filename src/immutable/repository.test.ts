@@ -3,10 +3,10 @@ import { mockJSONCodec } from '../../test/util/codecs.js';
 import { getChannels, type Channel } from '../channels/index.js';
 import { CodecRegistry } from '../codec/codecs.js';
 import { File } from '../file/file.js';
-import { ContentIdentifier, IdentifierRegistry } from '../identifiers/identifiers.js';
-import { deleteImmutable, getImmutable, putImmutable } from './operations.js';
+import { ContentIdentifier, SchemeRegistry } from '../identifiers/identifiers.js';
 import { Hash, HashAlgorithm } from './hashes.js';
-import { Immutable } from './schema.js';
+import { deleteImmutable, getImmutable, putImmutable } from './repository.js';
+import { Immutable } from './scheme.js';
 
 const instanceID = 'Immutable Operations';
 const mockDriverA: Channel = {};
@@ -15,7 +15,7 @@ const channels = getChannels(instanceID);
 
 channels.push(mockDriverA, mockDriverB);
 CodecRegistry.register(mockJSONCodec, { instanceID });
-IdentifierRegistry.register(Immutable, { instanceID });
+SchemeRegistry.register(Immutable, { instanceID });
 
 function createHash() {
   return crypto.getRandomValues(new Uint8Array(33));
@@ -62,15 +62,15 @@ test('Get immutable', async () => {
     },
   });
 
-  IdentifierRegistry.register({ key: Immutable.key, parse: (_, v) => v }, { instanceID });
+  SchemeRegistry.register({ key: Immutable.key, parse: (_, v) => v }, { instanceID });
 
   for (const cid of [existing, new Hash(existing)]) {
-    await expect(getImmutable(cid, instanceID)).resolves.toEqual(existingCID);
+    await expect(getImmutable<unknown>(cid, instanceID)).resolves.toEqual(existingCID);
   }
 
   const nonExistent = crypto.getRandomValues(new Uint8Array(16));
   for (const cid of [nonExistent, new Hash(nonExistent)]) {
-    await expect(getImmutable(cid, instanceID)).resolves.toBeUndefined();
+    await expect(getImmutable<unknown>(cid, instanceID)).resolves.toBeUndefined();
   }
 });
 

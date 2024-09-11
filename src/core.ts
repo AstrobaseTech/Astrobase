@@ -7,4 +7,5 @@ export * from './immutable/index.js';
 export * from './internal/index.js';
 export * from './json/codec.js';
 export * from './middleware/index.js';
+export * from './mutable/index.js';
 export * from './registry/index.js';

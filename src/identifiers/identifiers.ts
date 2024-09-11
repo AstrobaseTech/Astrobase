@@ -2,8 +2,9 @@
 
 import { queryChannelsAsync, queryChannelsSync } from '../channels/channels.js';
 import { Varint } from '../encoding/varint.js';
-import { Immutable } from '../immutable/schema.js';
+import { Immutable } from '../immutable/scheme.js';
 import { Base58, type MaybePromise } from '../internal/index.js';
+import { Mutable } from '../mutable/scheme.js';
 import { Registry, type RegistryModule } from '../registry/registry.js';
 
 /**
@@ -25,13 +26,14 @@ export type ContentIdentifierLike =
  */
 export interface ContentIdentifierScheme<T> extends RegistryModule<number> {
   /**
-   * Defines a function that takes a identifier/content pair, validates it, and then returns a
-   * parsed value. This function can be asynchronous and return a promise.
+   * Defines a handler function for parsing and validating a content identifier and content buffer
+   * pair.
    *
-   * @param identifier The Identifier.
-   * @param content The value as bytes.
+   * @param identifier The {@linkcode ContentIdentifier}.
+   * @param content The content buffer.
    * @param instanceID The ID of the instance where the function was called.
-   * @returns The parsed value or, if performing some validation which fails, return `void`.
+   * @returns The parsed value or a promise that resolves with the parsed value. If performing some
+   *   validation which fails, instead return `void`.
    */
   parse(
     identifier: ContentIdentifier,
@@ -98,11 +100,18 @@ export class ContentIdentifier {
  *
  * @category Content Identifiers
  */
-export const IdentifierRegistry = new Registry<number, ContentIdentifierScheme<unknown>>({
-  defaults: { 1: Immutable },
+export const SchemeRegistry = new Registry<number, ContentIdentifierScheme<unknown>>({
+  defaults: { 1: Immutable, 2: Mutable },
   validateKey: (key) => Number.isInteger(key),
   validateModule: (value) => typeof value.parse === 'function',
 });
+
+/**
+ * Legacy alias for {@linkcode SchemeRegistry}.
+ *
+ * @deprecated Use {@linkcode SchemeRegistry}.
+ */
+export const IdentifierRegistry = SchemeRegistry;
 
 /**
  * Sends a delete request to all registered channels asynchronously.
@@ -128,10 +137,7 @@ export async function deleteOne(id: ContentIdentifierLike, instanceID?: string) 
  */
 export function getOne<T>(id: ContentIdentifierLike, instanceID?: string) {
   id = new ContentIdentifier(id);
-  const scheme = IdentifierRegistry.getStrict(
-    id.type.value,
-    instanceID,
-  ) as ContentIdentifierScheme<T>;
+  const scheme = SchemeRegistry.getStrict(id.type.value, instanceID) as ContentIdentifierScheme<T>;
   return queryChannelsSync(async (channel) => {
     const content = await channel.get?.(id);
     if (content) {
@@ -157,7 +163,7 @@ export async function putOne(
 ) {
   id = new ContentIdentifier(id);
   value = new Uint8Array(value);
-  const identifierSchema = IdentifierRegistry.getStrict(id.type.value, instanceID);
+  const identifierSchema = SchemeRegistry.getStrict(id.type.value, instanceID);
   if (!(await Promise.resolve(identifierSchema.parse(id, value as Uint8Array, instanceID)))) {
     throw new Error('Invalid value');
   }
