@@ -1,39 +1,39 @@
-/**
- * The type used for the key when registering and retrieving {@linkcode RegistryModule} instances
- * from a {@linkcode Registry}.
- *
- * @category Registry
- */
+/** @module Registry */
+
+/** The type used for the key when registering and retrieving instances from a {@linkcode Registry}. */
 export type RegistryKey = string | number | symbol;
 
 /**
- * The base interface for modules in a {@linkcode Registry}.
+ * A third-party module that can be registered in a {@linkcode Registry}.
  *
- * @category Registry
+ * @template K The type of the key.
+ * @template T The type of the strategy implementation.
  */
-export interface RegistryModule<K extends RegistryKey> {
+export interface RegistryModule<K extends RegistryKey, T> {
   /** A key or array of keys that this module can automatically be registered with. */
   key?: K | Array<K>;
+
+  /** The strategy implementation provided by the module. */
+  strategy: T;
 }
 
 /**
- * Options that can be provided when registering a {@linkcode RegistryModule} in a
- * {@linkcode Registry}.
+ * Options that can be provided when registering a strategy to a {@linkcode Registry}.
  *
- * @category Registry
+ * @template K The type of the key.
  */
 export type RegisterOptions<K extends RegistryKey> = {
-  /** When specified, overrides the key(s) that the module is registered with. */
+  /** When specified, overrides the key(s) that the strategy is registered with. */
   key?: K | Array<K>;
 
   /**
-   * When set to true, if a module is already registered with the target key, that module will be
-   * replaced with the one being registered.
+   * When set to true, if a strategy is already registered with the target key, that strategy will
+   * be replaced with the one being registered.
    */
   force?: boolean;
 } & (
   | {
-      /** If true, the module is registered at the global level. */
+      /** If true, the strategy is registered at the global level. */
       global?: false;
 
       /**
@@ -51,54 +51,21 @@ export type RegisterOptions<K extends RegistryKey> = {
 );
 
 /**
- * Error codes related to the registry.
- *
- * @category Registry
- */
-export const RegistryErrorCode = {
-  /** The key already had a module registered and `force` mode was false. */
-  KeyInUse: 0,
-  /** The value for the key failed validation. */
-  KeyInvalid: 1,
-  /** No key was specified by the module or options. */
-  KeyMissing: 2,
-  /** The module failed validation. */
-  ModuleInvalid: 3,
-  /** The module was not found. */
-  ModuleNotFound: 4,
-} as const;
-
-/**
- * An error thrown by {@linkcode Registry} methods.
- *
- * @category Registry
- */
-export class RegistryError extends Error {
-  constructor(
-    /** The {@linkcode RegistryErrorCode}. */
-    readonly code: (typeof RegistryErrorCode)[keyof typeof RegistryErrorCode],
-    /** Additional context associated with the error. */
-    readonly context?: unknown,
-  ) {
-    super();
-  }
-}
-
-/**
  * Registry construction options.
  *
- * @category Registry
  * @template K The type used for keys.
  * @template T The type used for modules.
+ * @template D Default keys that must be provided in `defaults`.
  */
-export interface RegistryOptions<K extends RegistryKey, T extends RegistryModule<K>> {
+export interface RegistryOptions<K extends RegistryKey, T, D extends K = K> {
   /**
-   * A map of global defaults for the registry. Applies across all instances where a module is not
-   * provided for the key.
+   * A map of global default strategies for the registry. Applies across all instances where a
+   * module is not registered to override the strategy for the key.
    */
-  defaults?: Record<K, T>;
+  defaults?: Record<D, T>;
+
   /**
-   * An optional validation function for Registry keys.
+   * An optional validation function for module key(s).
    *
    * For instance, the following function will ensure the key is an integer.
    *
@@ -108,17 +75,18 @@ export interface RegistryOptions<K extends RegistryKey, T extends RegistryModule
    * @returns A boolean indicating whether or not the validation passed.
    */
   validateKey?(key: K): boolean;
+
   /**
-   * An optional validation function for Registry modules.
+   * An optional validation function for module strategy implementations.
    *
-   * For instance, the following function will ensure the module contains a `parse` function.
+   * For instance, the following function will ensure the strategy is a function.
    *
-   *     (value) => typeof value.parse === 'function';
+   *     (strategy) => typeof strategy === 'function';
    *
-   * @param value The module to validate.
+   * @param strategy The strategy implementation to validate.
    * @returns A boolean indicating whether or not the validation passed.
    */
-  validateModule?(value: T): boolean;
+  validateStrategy?(strategy: T): boolean;
 }
 
 /**
@@ -128,128 +96,121 @@ export interface RegistryOptions<K extends RegistryKey, T extends RegistryModule
  * ecosystem to keep things consistent, but also to reduce code duplication.
  *
  * Features like the Codec and Middleware systems expose an instance of `Registry` to allow users to
- * register Codecs and Middlewares.
+ * register custom implementations.
  *
  * ## Order of Precendence
  *
  * The `Registry` class has three levels:
  *
- * 1. Default - "built in" modules provided by the constructor of the `Registry`, available across all
- *    instances.
- * 2. Global - user provided modules, available across all instances.
- * 3. Instance - user provided modules, available to a particular instance.
+ * 1. Default - "built in" strategies provided at construction time and available across all instances.
+ * 2. Global - user provided strategies, available across all instances.
+ * 3. Instance - user provided strategies, available only to a particular instance.
  *
- * Each level takes precedent over the last - so, for example, if a module has been provided for the
- * same key at both the global and instance levels, the instance level module is the one that is
- * retrieved by {@linkcode get} and {@linkcode getStrict}.
+ * Each level takes precedent over the last - so, for example, if a strategy has been provided for
+ * the same key at both the global and instance levels, the instance level strategy is the one that
+ * is retrieved by {@linkcode get} and {@linkcode getStrict}.
  *
  * ## Options
  *
- * When creating a `Registry` a {@linkcode RegistryOptions} object may be provided to provide
- * defaults, and validation for registration keys and values (modules).
+ * When creating a `Registry`, a {@linkcode RegistryOptions} object may be provided that can provide
+ * default strategies and/or validation functions for registration keys and strategies.
  *
- * TypeScript type parameters may also be provided to restrict the key and module types. The module
- * type must extend {@linkcode RegistryModule}`<K>` which has a mechanism for a module optionally
- * defining its key.
+ * TypeScript type parameters should be provided to restrict the key and module types. There is
  *
  * ## Example
  *
  * Using TypeScript and providing type parameters:
  *
  * ```ts
- * interface Encoder extends RegistryModule<string> {
+ * interface Encoder {
  *   encode(value): ArrayBuffer;
  *   decode(value): string;
  * }
  *
  * const EncoderRegistry = new Registry<string, Encoder>({
  *   validateKey: (k) => typeof k === 'string',
- *   validateModule: (m) => typeof m.encode === 'function' && typeof m.decode === 'function',
+ *   validateStrategy: (s) => typeof s.encode === 'function' && typeof s.decode === 'function',
  * });
  * ```
  *
- * @category Registry
- * @template K The type used for keys.
- * @template T The type used for modules.
+ * @template K The type for keys.
+ * @template T The type for strategies.
+ * @template D A narrowed type of the `K` type. Enforces that a strategy must be provided in the
+ *   {@linkcode RegistryOptions} defaults for the specific set of keys.
  */
-export class Registry<K extends RegistryKey, T extends RegistryModule<K>> {
+export class Registry<K extends RegistryKey, T, D extends K = K> {
   /** @ignore */
   private readonly global = new Map<K, T>();
 
   /** @ignore */
   private readonly instance: Partial<Record<string, Map<K, T>>> = {};
 
-  /**
-   * @template K The type used for keys.
-   * @template T The type used for modules.
-   * @param options Registry construction options.
-   */
-  constructor(private readonly options?: RegistryOptions<K, T>) {}
+  /** @param options Registry construction options. */
+  constructor(private readonly options?: RegistryOptions<K, T, D>) {}
 
   /**
-   * Gets a module safely, by key. If not found, this method will simply return `void`. See
-   * {@linkcode Registry} for more on the order of precedence when retrieving modules.
+   * Retrieves a strategy by its key. If no strategy is available for the key, `void` is returned.
    *
-   * @param key The key of the target module.
-   * @param instanceID The target instance ID.
-   * @returns The module or `undefined` if no module is registered with the key.
+   * @param key The key of the strategy.
+   * @param instanceID The target instance.
+   * @returns The strategy or `void` if no strategy is available for the key.
    */
-  get(key: K, instanceID?: string): T | undefined {
+  get(key: K, instanceID = ''): T | undefined {
     return (
-      this.instance[instanceID ?? '']?.get(key) ??
+      this.instance[instanceID]?.get(key) ??
       this.global.get(key) ??
-      this.options?.defaults?.[key]
+      (this.options?.defaults as Record<K, T>)?.[key]
     );
   }
 
   /**
-   * Gets a module unsafely. If not found, an error is thrown. See {@linkcode Registry} for more on
-   * the order of precedence when retrieving modules.
+   * Retrieves a strategy by its key. If no strategy is available for the key, an error is thrown.
    *
-   * @param key The key of the target module.
-   * @param instanceID The target instance ID.
-   * @returns The module.
-   * @throws A {@linkcode RegistryError} if no module is registered with the key.
+   * @param key The key of the strategy.
+   * @param instanceID The target instance.
+   * @returns The strategy.
+   * @throws If no strategy is available for the key.
    */
   getStrict(key: K, instanceID?: string) {
     const value = this.get(key, instanceID);
     if (!value) {
-      throw new RegistryError(RegistryErrorCode.ModuleNotFound, key);
+      throw new ReferenceError(`Strategy not found: ${key.toString()}`);
     }
     return value;
   }
 
   /**
-   * Registers a module. A module can be registered either globally or targeted for a specific
-   * instance (see {@linkcode Registry} and {@linkcode RegisterOptions}).
+   * Registers a strategy for a key.
    *
-   * @param module A module to register.
+   * @param module The strategy module to register.
    * @param options An optional {@linkcode RegisterOptions} object.
    */
-  register(module: T, options?: RegisterOptions<K>) {
-    if (this.options?.validateModule && !this.options.validateModule(module)) {
-      throw new RegistryError(RegistryErrorCode.ModuleInvalid);
+  register(module: RegistryModule<K, T>, options?: RegisterOptions<K>) {
+    if (
+      module.strategy === undefined ||
+      module.strategy === null ||
+      (this.options?.validateStrategy && !this.options.validateStrategy(module.strategy))
+    ) {
+      throw new TypeError('Invalid strategy');
     }
     let key = options?.key ?? module.key;
     if (key === undefined || key === null) {
-      throw new RegistryError(RegistryErrorCode.KeyMissing);
+      throw new TypeError('No key provided');
     }
     key = key instanceof Array ? key : [key];
     const instance = options?.global
       ? this.global
       : (this.instance[options?.instanceID ?? ''] ??= new Map<K, T>());
-    if (this.options?.validateKey ?? !options?.force) {
-      for (const k of key) {
-        if (this.options?.validateKey && !this.options.validateKey(k)) {
-          throw new RegistryError(RegistryErrorCode.KeyInvalid);
-        }
-        if (!options?.force && instance.get(k)) {
-          throw new RegistryError(RegistryErrorCode.KeyInUse);
-        }
+    for (const k of key) {
+      if (this.options?.validateKey && !this.options.validateKey(k)) {
+        throw new TypeError('Invalid key');
+      }
+      if (!options?.force && instance.get(k)) {
+        throw new Error('Key in use');
       }
     }
     for (const k of key) {
-      instance.set(k, module);
+      instance.set(k, module.strategy);
     }
   }
 }

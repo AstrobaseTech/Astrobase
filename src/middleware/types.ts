@@ -1,10 +1,13 @@
-import type { CodecProps } from '../codec/codecs.js';
+import type { MaybePromise } from '../internal/index.js';
 
-/** Additional properties provided to the middleware. */
-export type MiddlewareProps = Pick<CodecProps, 'instanceID'>;
+/** Additional context properties provided to the middleware. */
+export interface MiddlewareContext {
+  /** The origin instance of invokation. */
+  instanceID: string;
+}
 
 /** A middleware that hooks into the transformation process of structured data. */
-export interface CodecMiddleware {
+export interface Middleware {
   /**
    * A function that may alter the value that ends up in the stringified output. This function
    * behaves similarly to the replacer function that can be provided to `JSON.stringify`. (See:
@@ -14,12 +17,17 @@ export interface CodecMiddleware {
    *   is part of an array, this will be the value's index number. Otherwise this will be
    *   `undefined`.
    * @param value The value.
-   * @param props Additional properties provided to the middleware.
+   * @param context Additional properties provided to the middleware.
    * @returns A value to replace the value within the stringified output. If not replacing the
    *   value, the input value should be returned.
    * @throws If performing some validation and it fails, an error should be thrown.
    */
-  replacer?: (key: string | number | undefined, value: unknown, props: MiddlewareProps) => unknown;
+  replacer: (
+    key: string | number | undefined,
+    value: unknown,
+    context: MiddlewareContext,
+  ) => MaybePromise<unknown>;
+
   /**
    * A function that may alter the value that ends up in the parsed output. This function behaves
    * similarly to the reviver function that can be provided to `JSON.parse`. (See:
@@ -29,10 +37,14 @@ export interface CodecMiddleware {
    *   is part of an array, this will be the value's index number. Otherwise this will be
    *   `undefined`.
    * @param value The value.
-   * @param props Additional properties provided to the middleware.
+   * @param context Additional properties provided to the middleware.
    * @returns A value to replace the value within the parsed output. If not replacing the value, the
    *   input value should be returned.
    * @throws If performing some validation and it fails, an error should be thrown.
    */
-  reviver?: (key: string | number | undefined, value: unknown, props: MiddlewareProps) => unknown;
+  reviver: (
+    key: string | number | undefined,
+    value: unknown,
+    context: MiddlewareContext,
+  ) => MaybePromise<unknown>;
 }

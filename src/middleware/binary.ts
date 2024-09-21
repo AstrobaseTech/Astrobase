@@ -1,6 +1,6 @@
 import { ContentIdentifier } from '../identifiers/identifiers.js';
 import { Base58, Base64, type BaseEncoder } from '../internal/encoding.js';
-import type { CodecMiddleware } from './types.js';
+import type { Middleware } from './types.js';
 
 /** A middleware to swap binary streams for base encoded strings. */
 export const BinaryMiddleware = {
@@ -39,6 +39,7 @@ export const BinaryMiddleware = {
       return value;
     }
 
+    // TODO(fix): NEED a dedicated global ReferenceMiddleware
     const isRefSlice = value.slice(1, 4);
     let isRef: boolean;
     if (isRefSlice === 'ref') {
@@ -63,4 +64,4 @@ export const BinaryMiddleware = {
 
     return isRef ? new ContentIdentifier(decoded) : decoded;
   },
-} satisfies CodecMiddleware;
+} satisfies Middleware;

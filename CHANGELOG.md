@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.0](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.4.0) - 2024-09-21
+
+### Added
+
+- Added remote procedure call (RPC) system.
+- Added registry for hash functions.
+- Add support for codec-scoped middleware.
+
+### Changed
+
+- Removed the channels system in favour of more powerful RPC system. IndexedDB and S3 have been upgraded to use this system.
+- Binary middleware is now scoped only to the JSON codec.
+- Renamed `deleteOne`, `getOne`, `putOne` to `deleteContent`, `getContent`, `putContent` respectively.
+- Separate module for hashes.
+- Improvements to make `Registry` construction nicer.
+
 ## [0.3.1](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.3.1) - 2024-09-11
 
 ### Added

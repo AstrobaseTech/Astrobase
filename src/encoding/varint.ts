@@ -1,10 +1,6 @@
 import { decode, encodingLength } from 'varint';
 
-/**
- * Common class for parsing varints in buffers.
- *
- * @category Classes
- */
+/** Parses a Protobuf style varint within a buffer. */
 export class Varint {
   constructor(
     private readonly buffer: Uint8Array,

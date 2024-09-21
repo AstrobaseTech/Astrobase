@@ -1,17 +1,12 @@
 /** @module Content Identifiers */
 
-import { queryChannelsAsync, queryChannelsSync } from '../channels/channels.js';
 import { Varint } from '../encoding/varint.js';
+import { parse } from '../file/parse.js';
 import { Immutable } from '../immutable/scheme.js';
 import { Base58, type MaybePromise } from '../internal/index.js';
-import { Mutable } from '../mutable/scheme.js';
-import { Registry, type RegistryModule } from '../registry/registry.js';
+import { Registry } from '../registry/registry.js';
 
-/**
- * A valid content identifier value. When a string is used, it must be base58 encoded.
- *
- * @category Content Identifiers
- */
+/** A valid content identifier value. When a string is used, it must be base58 encoded. */
 export type ContentIdentifierLike =
   | ArrayLike<number>
   | ArrayBufferLike
@@ -19,28 +14,20 @@ export type ContentIdentifierLike =
   | ContentIdentifier;
 
 /**
- * Describes a content identifier scheme and defines its handlers.
+ * A handler function for parsing and validating a content identifier and content buffer pair.
  *
- * @category Content Identifiers
- * @template T The type returned by the parse function.
+ * @template T The type returned after a successful parse.
+ * @param identifier The {@linkcode ContentIdentifier}.
+ * @param content The content buffer.
+ * @param instanceID The ID of the instance where the function was called.
+ * @returns The parsed value or a promise that resolves with the parsed value. If performing some
+ *   validation which fails, instead return `void`.
  */
-export interface ContentIdentifierScheme<T> extends RegistryModule<number> {
-  /**
-   * Defines a handler function for parsing and validating a content identifier and content buffer
-   * pair.
-   *
-   * @param identifier The {@linkcode ContentIdentifier}.
-   * @param content The content buffer.
-   * @param instanceID The ID of the instance where the function was called.
-   * @returns The parsed value or a promise that resolves with the parsed value. If performing some
-   *   validation which fails, instead return `void`.
-   */
-  parse(
-    identifier: ContentIdentifier,
-    content: Uint8Array,
-    instanceID?: string,
-  ): MaybePromise<T | void>;
-}
+export type ContentIdentifierSchemeParser<T> = (
+  identifier: ContentIdentifier,
+  content: Uint8Array,
+  instanceID?: string,
+) => MaybePromise<T | void>;
 
 /**
  * Represents a content identifier and implements methods for parsing and encoding it.
@@ -54,8 +41,6 @@ export interface ContentIdentifierScheme<T> extends RegistryModule<number> {
  * itself, which will vary per type.
  *
  * When presenting a content identifier in human-readable form, we use base58 encoding.
- *
- * @category Content Identifiers
  */
 export class ContentIdentifier {
   /** The full bytes. */
@@ -95,77 +80,11 @@ export class ContentIdentifier {
 }
 
 /**
- * A {@linkcode Registry} for storing {@linkcode ContentIdentifierScheme} instances and associating
- * them with a type integer.
- *
- * @category Content Identifiers
+ * A {@linkcode Registry} for storing {@linkcode ContentIdentifierSchemeParser} instances and
+ * associating them with a type integer.
  */
-export const SchemeRegistry = new Registry<number, ContentIdentifierScheme<unknown>>({
-  defaults: { 1: Immutable, 2: Mutable },
+export const SchemeRegistry = new Registry<number, ContentIdentifierSchemeParser<unknown>>({
+  defaults: { 1: Immutable, 2: parse },
   validateKey: (key) => Number.isInteger(key),
-  validateModule: (value) => typeof value.parse === 'function',
+  validateStrategy: (strategy) => typeof strategy === 'function',
 });
-
-/**
- * Legacy alias for {@linkcode SchemeRegistry}.
- *
- * @deprecated Use {@linkcode SchemeRegistry}.
- */
-export const IdentifierRegistry = SchemeRegistry;
-
-/**
- * Sends a delete request to all registered channels asynchronously.
- *
- * @category Repository
- * @param id The identifier of the value to delete.
- * @param instanceID The target instance ID where the channels to query are registered.
- * @returns A promise that resolves when all requests have completed.
- */
-export async function deleteOne(id: ContentIdentifierLike, instanceID?: string) {
-  await queryChannelsAsync((channel) => channel.delete?.(new ContentIdentifier(id)), instanceID);
-}
-
-/**
- * Queries the registered channels synchronously, and channel groups asynchronously, until we
- * receive a value that passes the {@linkcode ContentIdentifierScheme} validation and parsing. If all
- * channels are queried with no successful result, returns `void`.
- *
- * @category Repository
- * @param id The identifier of the value to get.
- * @param instanceID The target instance ID where the channels to query are registered.
- * @returns The value or `void` if no valid value was retrieved.
- */
-export function getOne<T>(id: ContentIdentifierLike, instanceID?: string) {
-  id = new ContentIdentifier(id);
-  const scheme = SchemeRegistry.getStrict(id.type.value, instanceID) as ContentIdentifierScheme<T>;
-  return queryChannelsSync(async (channel) => {
-    const content = await channel.get?.(id);
-    if (content) {
-      return await Promise.resolve(scheme.parse(id, new Uint8Array(content), instanceID));
-    }
-  }, instanceID);
-}
-
-/**
- * Sends a put request to all channels asynchronously to store an identifier/value pair. The pair
- * will first be validated and, if successful, the requests will be made.
- *
- * @category Repository
- * @param id The identifier.
- * @param value The value.
- * @param instanceID The target instance ID where the channels to query are registered.
- * @returns A promise that resolves when all requests have completed.
- */
-export async function putOne(
-  id: ContentIdentifierLike,
-  value: ArrayLike<number> | ArrayBufferLike,
-  instanceID?: string,
-) {
-  id = new ContentIdentifier(id);
-  value = new Uint8Array(value);
-  const identifierSchema = SchemeRegistry.getStrict(id.type.value, instanceID);
-  if (!(await Promise.resolve(identifierSchema.parse(id, value as Uint8Array, instanceID)))) {
-    throw new Error('Invalid value');
-  }
-  await queryChannelsAsync((channel) => channel.put?.(id, value as Uint8Array), instanceID);
-}

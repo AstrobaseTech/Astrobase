@@ -1,9 +1,9 @@
 import { File } from '../file/file.js';
-import type { ContentIdentifierScheme } from '../identifiers/identifiers.js';
+import type { ContentIdentifierSchemeParser } from '../identifiers/identifiers.js';
 
 /**
- * A parse handler for {@linkcode ContentIdentifierScheme}s, such as `Immutable` and `Mutable`, that
- * deal with {@linkcode File}s.
+ * A parse handler for {@linkcode ContentIdentifierSchemeParser}s, such as `Immutable` and `Mutable`,
+ * that deal with {@linkcode File}s.
  *
  * @param _ The content identifier (unused).
  * @param content The content buffer.
@@ -13,7 +13,7 @@ import type { ContentIdentifierScheme } from '../identifiers/identifiers.js';
  *   thrown.
  * @internal
  */
-export const parse: ContentIdentifierScheme<File>['parse'] = async (_, content, instanceID) => {
+export const parse: ContentIdentifierSchemeParser<File> = async (_, content, instanceID) => {
   const file = new File(content);
   await file.getValue(instanceID); // validate
   return file;

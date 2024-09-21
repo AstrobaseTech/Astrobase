@@ -1,6 +1,10 @@
 import { File } from '../file/file.js';
-import { deleteOne, getOne, putOne } from '../identifiers/identifiers.js';
-import { Mutable } from './scheme.js';
+import {
+  deleteContent,
+  getContent,
+  putContent,
+  type PutOptions,
+} from '../repository/repository.js';
 
 const encoder = new TextEncoder();
 
@@ -11,7 +15,7 @@ const encoder = new TextEncoder();
  * @returns The mutable content identifier byte array.
  * @experimental
  */
-export const keyToCID = (key: string) => [Mutable.key, ...encoder.encode(key)];
+export const keyToCID = (key: string) => [2, ...encoder.encode(key)];
 
 /**
  * Sends a request, to all registered channels asynchronously, to delete an item of mutable content.
@@ -23,7 +27,7 @@ export const keyToCID = (key: string) => [Mutable.key, ...encoder.encode(key)];
  * @experimental
  */
 export function deleteMutable(key: string, instanceID?: string) {
-  return deleteOne(keyToCID(key), instanceID);
+  return deleteContent(keyToCID(key), instanceID);
 }
 
 /**
@@ -39,7 +43,7 @@ export function deleteMutable(key: string, instanceID?: string) {
  * @experimental
  */
 export function getMutable<T>(key: string, instanceID?: string) {
-  return getOne<File<T>>(keyToCID(key), instanceID);
+  return getContent<File<T>>(keyToCID(key), instanceID);
 }
 
 /**
@@ -49,9 +53,10 @@ export function getMutable<T>(key: string, instanceID?: string) {
  * @param key The key string. Unlike other content identifiers, any regular UTF-8 string is
  *   supported.
  * @param file A {@linkcode File} instance to save.
+ * @param options Additional {@linkcode PutOptions}.
  * @returns A promise that resolves when all requests have completed.
  * @experimental
  */
-export function putMutable<T>(key: string, file: File<T>, instanceID?: string) {
-  return putOne(keyToCID(key), file.buffer, instanceID);
+export function putMutable<T>(key: string, file: File<T>, options: PutOptions) {
+  return putContent(keyToCID(key), file.buffer, options);
 }

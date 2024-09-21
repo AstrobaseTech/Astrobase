@@ -1,6 +1,6 @@
 import { encode, encodingLength } from 'varint';
 import { beforeEach, describe, expect, it, test } from 'vitest';
-import { fuzz } from '../../test/util/utils.js';
+import { fuzz } from '../../testing/fuzz.js';
 import { DEFAULT_FILE_VERSION, File, SUPPORTED_FILE_VERSIONS, TIMESTAMP_BITMASK } from './file.js';
 
 describe('File Builder API', () => {

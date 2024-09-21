@@ -1,6 +1,6 @@
 {
   "name": "@astrobase/core",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "An extensible protocol suite for building multi-user apps with native privacy, security, and self-sovereignty.",
   "keywords": [
     "astrobase",
@@ -28,6 +28,18 @@
     "./indexeddb": {
       "types": "./dist/indexeddb/indexeddb.d.ts",
       "default": "./dist/indexeddb/indexeddb.js"
+    },
+    "./rpc/client": {
+      "types": "./dist/rpc/client/index.d.ts",
+      "default": "./dist/rpc/client/index.js"
+    },
+    "./rpc/server": {
+      "types": "./dist/rpc/server.d.ts",
+      "default": "./dist/rpc/server.js"
+    },
+    "./rpc/shared": {
+      "types": "./dist/rpc/shared/index.d.ts",
+      "default": "./dist/rpc/shared/index.js"
     },
     "./s3": {
       "types": "./dist/s3/s3.d.ts",
@@ -76,7 +88,7 @@
     "@typescript-eslint/eslint-plugin": "^7.14.0",
     "@typescript-eslint/parser": "^7.14.0",
     "@vitest/coverage-v8": "^2.0.0",
-    "concurrently": "9.0.0",
+    "concurrently": "9.0.1",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-deprecation": "^3.0.0",

@@ -1,91 +1,116 @@
-import { describe, expect, test } from 'vitest';
-import { mockJSONCodec } from '../../test/util/codecs.js';
-import { getChannels, type Channel } from '../channels/index.js';
-import { CodecRegistry } from '../codec/codecs.js';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { File } from '../file/file.js';
-import { ContentIdentifier, SchemeRegistry } from '../identifiers/identifiers.js';
-import { Hash, HashAlgorithm } from './hashes.js';
-import { deleteImmutable, getImmutable, putImmutable } from './repository.js';
-import { Immutable } from './scheme.js';
+import { hash, Hash, HashAlgorithm } from '../hashes/index.js';
+import { ContentIdentifier } from '../identifiers/identifiers.js';
+import { clients, type RPCClientConfig } from '../rpc/client/index.js';
+import type { ContentProcedures } from '../rpc/shared/index.js';
+import { deleteImmutable, getImmutable, putImmutable, toImmutableCID } from './repository.js';
 
-const instanceID = 'Immutable Operations';
-const mockDriverA: Channel = {};
-const mockDriverB: Channel = {};
-const channels = getChannels(instanceID);
+const instanceID = 'Immutable';
 
-channels.push(mockDriverA, mockDriverB);
-CodecRegistry.register(mockJSONCodec, { instanceID });
-SchemeRegistry.register(Immutable, { instanceID });
+describe(instanceID, () => {
+  describe('Delete', () => {
+    const deleteHandler = vi.fn();
+    const client: RPCClientConfig<Pick<ContentProcedures, 'content:delete'>> = {
+      instanceID,
+      strategy: { procedures: { 'content:delete': deleteHandler } },
+    };
 
-function createHash() {
-  return crypto.getRandomValues(new Uint8Array(33));
-}
+    beforeAll(() => clients.add(client));
+    afterAll(() => clients.delete(client));
 
-describe('Delete immutable', () => {
-  const baseHash = new Hash([HashAlgorithm.SHA256, ...createHash()]);
-  const testCases = [
-    ['Uint8Array', baseHash.bytes],
-    ['Hash', baseHash],
-  ] as const;
-  for (const [paramType, requestHash] of testCases) {
-    test('With ' + paramType, async () => {
-      let calls = 0;
-      function deleteMock(id: ContentIdentifier) {
-        calls++;
-        expect(id.rawValue).toEqual(baseHash.bytes);
-      }
-      mockDriverA.delete = deleteMock;
-      mockDriverB.delete = deleteMock;
-      await expect(deleteImmutable(requestHash, instanceID)).resolves.toBeUndefined();
-      expect(calls).toBe(2);
-    });
-  }
-});
+    const hash = new Hash([HashAlgorithm.SHA256, ...crypto.getRandomValues(new Uint8Array(32))]);
+    const cid = toImmutableCID(hash);
 
-test('Get immutable', async () => {
-  const instanceID = 'Get File';
-
-  const existing = crypto.getRandomValues(new Uint8Array(16));
-  const existingCID = new Uint8Array([Immutable.key, ...existing]);
-
-  getChannels(instanceID).push({
-    get(id) {
-      if (id.bytes.length !== existingCID.length) {
-        return;
-      }
-      for (let i = 0; i < id.bytes.length; i++) {
-        if (id.bytes[i] !== existingCID[i]) {
-          return;
-        }
-      }
-      return id.bytes;
-    },
+    (
+      [
+        ['array', [...hash.bytes]],
+        ['base58 string', hash.toBase58()],
+        ['Hash', hash],
+        ['Uint8Array', hash.bytes],
+      ] as const
+    ).forEach(([name, cidLike], i) =>
+      test(`With ${name}`, () => {
+        expect(deleteImmutable(cidLike, instanceID)).resolves.toBeUndefined();
+        expect(deleteHandler).toBeCalledTimes(i + 1);
+        expect(deleteHandler).lastCalledWith(cid, instanceID);
+      }),
+    );
   });
 
-  SchemeRegistry.register({ key: Immutable.key, parse: (_, v) => v }, { instanceID });
+  describe('Get', async () => {
+    const file = await new File().setMediaType('application/json').setValue({ test: 'test' });
+    const fileHash = await hash(HashAlgorithm.SHA256, file.buffer);
+    const fileCID = toImmutableCID(fileHash);
 
-  for (const cid of [existing, new Hash(existing)]) {
-    await expect(getImmutable<unknown>(cid, instanceID)).resolves.toEqual(existingCID);
-  }
+    const invalidCIDs = [
+      crypto.getRandomValues(new Uint8Array(33)),
+      [HashAlgorithm.SHA256, ...crypto.getRandomValues(new Uint8Array(32))],
+    ].map((arr) => toImmutableCID(arr));
 
-  const nonExistent = crypto.getRandomValues(new Uint8Array(16));
-  for (const cid of [nonExistent, new Hash(nonExistent)]) {
-    await expect(getImmutable<unknown>(cid, instanceID)).resolves.toBeUndefined();
-  }
-});
+    const getHandler = vi.fn((inputCID: ContentIdentifier) => {
+      for (const knownCID of [fileCID, ...invalidCIDs]) {
+        if (inputCID.toBase58() === knownCID.toBase58()) {
+          return Promise.resolve(file.buffer);
+        }
+      }
+      return Promise.resolve();
+    });
 
-test('Put immutable', async () => {
-  const mediaType = 'application/json';
-  const value = { test: 'test' };
-  const file = await new File().setMediaType(mediaType).setValue(value);
-  let calls = 0;
-  function putMock(id: ContentIdentifier, object: Uint8Array) {
-    calls++;
-    expect(id.rawValue).toBeInstanceOf(Uint8Array);
-    expect(object).toBeInstanceOf(Uint8Array);
-  }
-  mockDriverA.put = putMock;
-  mockDriverB.put = putMock;
-  await expect(putImmutable(file, { instanceID })).resolves.toBeInstanceOf(ContentIdentifier);
-  expect(calls).toBe(2);
+    const client: RPCClientConfig<Pick<ContentProcedures, 'content:get'>> = {
+      instanceID,
+      strategy: { procedures: { 'content:get': getHandler } },
+    };
+
+    beforeAll(() => clients.add(client));
+    afterAll(() => clients.delete(client));
+
+    let i = 0;
+
+    test('Found and valid', () => {
+      expect(getImmutable<unknown>(fileHash, instanceID)).resolves.toEqual(file);
+      expect(getHandler).toBeCalledTimes(++i);
+      expect(getHandler).lastCalledWith(fileCID, instanceID);
+      expect(getHandler).lastReturnedWith(Promise.resolve(file.buffer));
+    });
+
+    test('Found but invalid', () => {
+      for (const cid of invalidCIDs) {
+        expect(getImmutable<unknown>(cid.rawValue, instanceID)).resolves.toBeUndefined();
+        expect(getHandler).toBeCalledTimes(++i);
+        expect(getHandler).lastCalledWith(cid, instanceID);
+        expect(getHandler).lastReturnedWith(Promise.resolve(file.buffer));
+      }
+    });
+
+    test('Not found', () => {
+      const cid = toImmutableCID([
+        HashAlgorithm.SHA256,
+        ...crypto.getRandomValues(new Uint8Array(32)),
+      ]);
+      expect(getImmutable<unknown>(cid.rawValue, instanceID)).resolves.toBeUndefined();
+      expect(getHandler).toBeCalledTimes(++i);
+      expect(getHandler).lastCalledWith(cid, instanceID);
+      expect(getHandler).lastReturnedWith(Promise.resolve());
+    });
+  });
+
+  describe('Put', () => {
+    const putHandler = vi.fn();
+    const client: RPCClientConfig<Pick<ContentProcedures, 'content:put'>> = {
+      instanceID,
+      strategy: { procedures: { 'content:put': putHandler } },
+    };
+
+    beforeAll(() => clients.add(client));
+    afterAll(() => clients.delete(client));
+
+    test('With File', async () => {
+      const file = await new File().setMediaType('application/json').setValue({ test: 'test' });
+      const cid = await putImmutable(file, { instanceID });
+      expect(cid).toBeInstanceOf(ContentIdentifier);
+      expect(putHandler).toBeCalledTimes(1);
+      expect(putHandler).lastCalledWith({ cid, content: file.buffer }, instanceID);
+    });
+  });
 });

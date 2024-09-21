@@ -6,40 +6,60 @@ import {
   PutObjectCommand,
   type S3Client,
 } from '@aws-sdk/client-s3';
-import type { Channel } from '../channels/channel.interface.js';
+import type { RPCClientStrategy } from '../rpc/client/types.js';
+import type { ContentProcedures } from '../rpc/shared/index.js';
+
+/** The configuration interface for the S3 {@linkcode RPCClientStrategy}. */
+export interface S3StrategyConfig {
+  /**
+   * A configured `S3Client` from the
+   * [`@aws-sdk/client-s3`](https://www.npmjs.com/package/@aws-sdk/client-s3) package.
+   */
+  Client: S3Client;
+  /** The bucket to read and write data to. */
+  Bucket: string;
+}
 
 /**
- * Creates a channel for AWS S3 or S3 compatible API.
+ * Creates an {@linkcode RPCClientStrategy} for AWS S3 (or other S3-compatible API).
  *
- * To use this, install and use the
- * [`@aws-sdk/client-s3`](https://www.npmjs.com/package/@aws-sdk/client-s3) package to configure an
- * `S3Client` to pass to this function.
- *
- * @param client A configured `S3Client`.
- * @param Bucket The bucket to read and write data to.
- * @returns A {@linkcode Channel} for the S3 bucket.
- * @experimental
+ * @param config The {@linkcode S3StrategyConfig} configuration object containing the configured
+ *   `S3Client` and target bucket.
+ * @returns The {@linkcode RPCClientStrategy}.
  */
-export function S3Driver(client: S3Client, Bucket: string) {
-  return {
-    /** See {@linkcode Channel}. */
-    async delete(id) {
-      await client.send(new DeleteObjectCommand({ Bucket, Key: id.toBase58() }));
+export const s3 = (config: S3StrategyConfig): RPCClientStrategy<ContentProcedures> => ({
+  procedures: {
+    async 'content:delete'(payload) {
+      await config.Client.send(
+        new DeleteObjectCommand({
+          Bucket: config.Bucket,
+          Key: payload.toBase58(),
+        }),
+      );
     },
 
-    /** See {@linkcode Channel}. */
-    async get(id) {
+    async 'content:get'(payload) {
       try {
-        const result = await client.send(new GetObjectCommand({ Bucket, Key: id.toBase58() }));
+        const result = await config.Client.send(
+          new GetObjectCommand({
+            Bucket: config.Bucket,
+            Key: payload.toBase58(),
+          }),
+        );
         return result.Body?.transformToByteArray();
       } catch (error) {
         return;
       }
     },
 
-    /** See {@linkcode Channel}. */
-    async put(id, Body) {
-      await client.send(new PutObjectCommand({ Bucket, Key: id.toBase58(), Body }));
+    async 'content:put'(payload) {
+      await config.Client.send(
+        new PutObjectCommand({
+          Bucket: config.Bucket,
+          Key: payload.cid.toBase58(),
+          Body: payload.content,
+        }),
+      );
     },
-  } satisfies Channel;
-}
+  },
+});

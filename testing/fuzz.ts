@@ -1,14 +1,3 @@
-export function resolveBeforeTimeout(promise: Promise<unknown>, timeout: number) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Timed out'));
-      }, timeout);
-    }),
-  ]);
-}
-
 /**
  * A useful function for fuzzing (random input testing). The `fuzzer` function will be invoked
  * repeatedly until the given `runtime` is reached, but not before iterating for at least

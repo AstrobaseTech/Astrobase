@@ -1,8 +1,4 @@
-/**
- * Common class for parsing ASCII strings in buffers.
- *
- * @category Classes
- */
+/** Parses a NUL terminated ASCII string within a buffer. */
 export class Ascii {
   constructor(
     private readonly buffer: Uint8Array,

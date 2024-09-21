@@ -1,5 +1,5 @@
 import { describe, expect, it, test } from 'vitest';
-import { encodes } from '../../test/util/encodes.js';
+import { encodes } from '../../testing/encodes.js';
 import * as m from './encoding.js';
 
 describe('Base58', () => {
