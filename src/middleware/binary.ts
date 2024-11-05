@@ -13,10 +13,11 @@ export const BinaryMiddleware = {
    *   stream.
    */
   replacer: (_, value) => {
-    for (const C of [ArrayBuffer, Uint8Array]) {
-      if (value instanceof C) {
-        return `$bin:b64:${Base64.encode(new Uint8Array(value))}`;
-      }
+    if (value instanceof ContentIdentifier) {
+      return `$ref:b58:${value.toBase58()}`;
+    }
+    if (value instanceof ArrayBuffer || value instanceof Uint8Array) {
+      return `$bin:b64:${Base64.encode(new Uint8Array(value))}`;
     }
     return value;
   },
@@ -39,7 +40,6 @@ export const BinaryMiddleware = {
       return value;
     }
 
-    // TODO(fix): NEED a dedicated global ReferenceMiddleware
     const isRefSlice = value.slice(1, 4);
     let isRef: boolean;
     if (isRefSlice === 'ref') {

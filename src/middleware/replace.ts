@@ -61,15 +61,17 @@ async function swap(
     value = await Promise.all(
       value.map((entry, index) => swap(middlewares, fn, instanceID, refTrack, entry, index)),
     );
-  } else if (value !== null && typeof value === 'object') {
+  } else if (value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
+    const oldObj = value;
+    value = {};
     refTrack.add(value);
-    for (const key of Object.keys(value)) {
+    for (const key of Object.keys(oldObj)) {
       (value as Record<string, unknown>)[key] = await swap(
         middlewares,
         fn,
         instanceID,
         refTrack,
-        (value as Record<string, unknown>)[key],
+        (oldObj as Record<string, unknown>)[key],
         key,
       );
     }

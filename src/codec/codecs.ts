@@ -127,6 +127,6 @@ export async function encodeWithCodec(
   mediaType = typeof mediaType === 'string' ? parse(mediaType) : mediaType;
   const codec = CodecRegistry.getStrict(mediaType.type, instanceID);
   const middlewares = getMiddlewares(instanceID).concat(codec.middlewares ?? []);
-  input = await replace(structuredClone(input), middlewares, instanceID);
+  input = await replace(input, middlewares, instanceID);
   return codec.encode(input, { instanceID, mediaType });
 }
