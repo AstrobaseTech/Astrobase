@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Changed middleware processing to recurse on arrays and simple objects only.
+- Changed middleware processing to skip number and boolean primitive types.
+
+### Fixed
+
+- Fixed `ContentIdentifier` instance serialization.
+
 ## [0.4.0](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.4.0) - 2024-09-21
 
 ### Added

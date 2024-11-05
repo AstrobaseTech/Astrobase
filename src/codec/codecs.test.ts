@@ -121,8 +121,8 @@ test('decodeWithCodec & encodeWithCodec use codec scoped middleware correctly', 
     }
   }
   for (const fn of [middleware.replacer, middleware.reviver]) {
-    expect(fn).toBeCalledTimes((input.length + 1) * 2);
-    expect(fn).lastCalledWith((input.length - 1).toString(), input.at(-1), { instanceID });
+    expect(fn).toBeCalledTimes(2);
+    expect(fn).lastCalledWith(undefined, input, { instanceID });
   }
 });
 

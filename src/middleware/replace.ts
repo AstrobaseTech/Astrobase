@@ -47,35 +47,58 @@ async function swap(
   value: unknown,
   key?: string | number,
 ): Promise<unknown> {
-  if (refTrack.has(value)) {
-    throw new ReferenceError('Circular reference');
-  }
-  for (const middleware of middlewares) {
-    const func = middleware[fn];
-    if (func) {
-      value = await Promise.resolve(func(key, value, { instanceID }));
+  // Skip over some primitive types
+  switch (typeof value) {
+    case 'bigint':
+    case 'boolean':
+    case 'number':
+    case 'undefined':
+      break;
+
+    default: {
+      if (value === null) {
+        break;
+      }
+
+      // Execute middleware
+      for (const middleware of middlewares) {
+        const func = middleware[fn];
+        if (func) {
+          value = await Promise.resolve(func(key, value, { instanceID }));
+        }
+      }
+
+      // Recurse on arrays and simple objects
+      if (typeof value === 'object' && value !== null) {
+        if (refTrack.has(value)) {
+          throw new ReferenceError('Circular reference');
+        }
+
+        if (value instanceof Array) {
+          refTrack.add(value);
+          value = await Promise.all(
+            value.map((entry, index) => swap(middlewares, fn, instanceID, refTrack, entry, index)),
+          );
+        } else if (Object.getPrototypeOf(value) === Object.prototype) {
+          refTrack.add(value);
+          const oldObj = value;
+          value = {};
+          for (const key of Object.keys(oldObj)) {
+            (value as Record<string, unknown>)[key] = await swap(
+              middlewares,
+              fn,
+              instanceID,
+              refTrack,
+              (oldObj as Record<string, unknown>)[key],
+              key,
+            );
+          }
+        }
+
+        refTrack.delete(value);
+      }
     }
   }
-  if (value instanceof Array) {
-    refTrack.add(value);
-    value = await Promise.all(
-      value.map((entry, index) => swap(middlewares, fn, instanceID, refTrack, entry, index)),
-    );
-  } else if (value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
-    const oldObj = value;
-    value = {};
-    refTrack.add(value);
-    for (const key of Object.keys(oldObj)) {
-      (value as Record<string, unknown>)[key] = await swap(
-        middlewares,
-        fn,
-        instanceID,
-        refTrack,
-        (oldObj as Record<string, unknown>)[key],
-        key,
-      );
-    }
-  }
-  refTrack.delete(value);
+
   return value;
 }
