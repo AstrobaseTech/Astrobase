@@ -57,6 +57,6 @@ export function getMutable<T>(key: string, instanceID?: string) {
  * @returns A promise that resolves when all requests have completed.
  * @experimental
  */
-export function putMutable<T>(key: string, file: File<T>, options: PutOptions) {
+export function putMutable<T>(key: string, file: File<T>, options?: PutOptions) {
   return putContent(keyToCID(key), file.buffer, options);
 }
