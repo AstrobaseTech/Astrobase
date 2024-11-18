@@ -1,0 +1,42 @@
+import { access, constants, readFile, rm, stat, writeFile } from 'fs/promises';
+import { join, normalize } from 'path';
+
+import type { ContentIdentifier } from '../identifiers/identifiers.js';
+import type { RPCClientStrategy } from '../rpc/client/types.js';
+import type { ContentProcedures } from '../rpc/shared/index.js';
+
+export interface FsOptions {
+  dir: string;
+}
+
+/**
+ * Creates an RPC client for persisting content to via the filesystem.
+ *
+ * @param options The {@linkcode FsOptions} object containing the target directory path.
+ * @returns A promise that resolves with the the {@linkcode RPCClientStrategy}.
+ */
+export async function filesystem(
+  options: FsOptions,
+): Promise<RPCClientStrategy<ContentProcedures>> {
+  const dir = normalize(options.dir);
+
+  const [isDir] = await Promise.all([
+    stat(dir).then((s) => s.isDirectory()),
+    access(dir, constants.R_OK | constants.W_OK),
+  ]);
+
+  if (!isDir) {
+    throw new Error('ENOTDIR: ' + dir);
+  }
+
+  /** Joins `dir` with `cid` to get path. */
+  const j = (cid: ContentIdentifier) => join(dir, cid.toString());
+
+  return {
+    procedures: {
+      'content:delete': (cid) => rm(j(cid)),
+      'content:get': (cid) => readFile(j(cid)),
+      'content:put': ({ cid, content }) => writeFile(j(cid), content),
+    },
+  };
+}
