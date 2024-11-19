@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Added a `filesystem` RPC client for content procedures via `@astrobase/core/fs`.
+
 ### Changed
 
 - Changed middleware processing to recurse on arrays and simple objects only.
@@ -10,6 +14,7 @@
 ### Fixed
 
 - Fixed `ContentIdentifier` instance serialization.
+- Made `putMutable` options param optional.
 
 ## [0.4.0](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.4.0) - 2024-09-21
 
