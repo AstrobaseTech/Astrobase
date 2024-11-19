@@ -56,7 +56,7 @@ export function getContent<T>(cid: ContentIdentifierLike, instanceID?: string) {
           })
           .then((content) => {
             if (!resolved) {
-              if (content === undefined && content === null) {
+              if (content === undefined || content === null) {
                 handleNull();
               } else {
                 resolved = true;

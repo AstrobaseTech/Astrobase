@@ -40,7 +40,6 @@ export type ProcedureResponse<T extends ProcedureConfig, P extends Procedure<T>>
   : unknown;
 
 /** The {@linkcode ProcedureConfig} for `content:*` procedures. */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ContentProcedures = {
   /** The request and response types of the `content:delete` procedure. */
   'content:delete': [ContentIdentifier, void];

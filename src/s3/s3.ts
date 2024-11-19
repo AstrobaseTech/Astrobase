@@ -47,6 +47,7 @@ export const s3 = (config: S3StrategyConfig): RPCClientStrategy<ContentProcedure
           }),
         );
         return result.Body?.transformToByteArray();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return;
       }

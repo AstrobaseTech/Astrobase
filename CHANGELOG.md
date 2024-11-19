@@ -15,6 +15,7 @@
 
 - Fixed `ContentIdentifier` instance serialization.
 - Made `putMutable` options param optional.
+- Fixed a rogue conditional `&&` where it should have been `||` while checking for null content in `getContent`.
 
 ## [0.4.0](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.4.0) - 2024-09-21
 
