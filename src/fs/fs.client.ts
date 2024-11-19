@@ -1,5 +1,5 @@
 import { access, constants, readFile, rm, stat, writeFile } from 'fs/promises';
-import { join, normalize } from 'path';
+import { join, resolve } from 'path';
 
 import type { ContentIdentifier } from '../identifiers/identifiers.js';
 import type { RPCClientStrategy } from '../rpc/client/types.js';
@@ -18,7 +18,7 @@ export interface FsOptions {
 export async function filesystem(
   options: FsOptions,
 ): Promise<RPCClientStrategy<ContentProcedures>> {
-  const dir = normalize(options.dir);
+  const dir = resolve(options.dir);
 
   const [isDir] = await Promise.all([
     stat(dir).then((s) => s.isDirectory()),
@@ -35,7 +35,17 @@ export async function filesystem(
   return {
     procedures: {
       'content:delete': (cid) => rm(j(cid)),
-      'content:get': (cid) => readFile(j(cid)),
+      'content:get': async (cid) => {
+        try {
+          const buf = await readFile(j(cid));
+          return new Uint8Array(buf);
+        } catch (e) {
+          if ((e as any)?.code === 'ENOENT') {
+            return;
+          }
+          throw e;
+        }
+      },
       'content:put': ({ cid, content }) => writeFile(j(cid), content),
     },
   };
