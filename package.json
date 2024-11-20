@@ -29,6 +29,10 @@
       "types": "./dist/fs/fs.client.d.ts",
       "default": "./dist/fs/fs.client.js"
     },
+    "./http": {
+      "types": "./dist/http/http.server.d.ts",
+      "default": "./dist/http/http.server.js"
+    },
     "./indexeddb": {
       "types": "./dist/indexeddb/indexeddb.d.ts",
       "default": "./dist/indexeddb/indexeddb.js"
