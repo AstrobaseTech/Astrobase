@@ -22,41 +22,44 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/core.d.ts",
-      "default": "./dist/core.js"
+      "types": "./dist/src/core.d.ts",
+      "default": "./dist/src/core.js"
     },
     "./fs": {
-      "types": "./dist/fs/fs.client.d.ts",
-      "default": "./dist/fs/fs.client.js"
+      "types": "./dist/src/fs/fs.client.d.ts",
+      "default": "./dist/src/fs/fs.client.js"
     },
     "./http": {
-      "types": "./dist/http/http.server.d.ts",
-      "default": "./dist/http/http.server.js"
+      "types": "./dist/src/http/http.server.d.ts",
+      "default": "./dist/src/http/http.server.js"
     },
     "./indexeddb": {
-      "types": "./dist/indexeddb/indexeddb.d.ts",
-      "default": "./dist/indexeddb/indexeddb.js"
+      "types": "./dist/src/indexeddb/indexeddb.d.ts",
+      "default": "./dist/src/indexeddb/indexeddb.js"
     },
     "./rpc/client": {
-      "types": "./dist/rpc/client/index.d.ts",
-      "default": "./dist/rpc/client/index.js"
+      "types": "./dist/src/rpc/client/index.d.ts",
+      "default": "./dist/src/rpc/client/index.js"
     },
     "./rpc/server": {
-      "types": "./dist/rpc/server.d.ts",
-      "default": "./dist/rpc/server.js"
+      "types": "./dist/src/rpc/server.d.ts",
+      "default": "./dist/src/rpc/server.js"
     },
     "./rpc/shared": {
-      "types": "./dist/rpc/shared/index.d.ts",
-      "default": "./dist/rpc/shared/index.js"
+      "types": "./dist/src/rpc/shared/index.d.ts",
+      "default": "./dist/src/rpc/shared/index.js"
     },
     "./s3": {
-      "types": "./dist/s3/s3.d.ts",
-      "default": "./dist/s3/s3.js"
+      "types": "./dist/src/s3/s3.d.ts",
+      "default": "./dist/src/s3/s3.js"
     }
   },
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/src/index.js",
+  "module": "dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "bin": {
+    "astrobase": "dist/bin/astrobase.js"
+  },
   "files": [
     "./dist"
   ],

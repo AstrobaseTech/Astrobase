@@ -5,6 +5,8 @@
 ### Added
 
 - Added a `filesystem` RPC client for content procedures via `@astrobase/core/fs`.
+- Added a `http` RPC server via `@astrobase/core/http`.
+- Added a `astrobase` HTTP daemon binary.
 
 ### Changed
 
