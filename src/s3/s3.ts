@@ -1,13 +1,8 @@
 /** @module S3 */
 
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-  type S3Client,
-} from '@aws-sdk/client-s3';
+// prettier-ignore
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, type S3Client } from '@aws-sdk/client-s3';
 import type { RPCClientStrategy } from '../rpc/client/types.js';
-import type { ContentProcedures } from '../rpc/shared/index.js';
 
 /** The configuration interface for the S3 {@linkcode RPCClientStrategy}. */
 export interface S3StrategyConfig {
@@ -27,7 +22,7 @@ export interface S3StrategyConfig {
  *   `S3Client` and target bucket.
  * @returns The {@linkcode RPCClientStrategy}.
  */
-export const s3 = (config: S3StrategyConfig): RPCClientStrategy<ContentProcedures> => ({
+export const s3 = (config: S3StrategyConfig): RPCClientStrategy => ({
   procedures: {
     async 'content:delete'(payload) {
       await config.Client.send(
@@ -46,7 +41,7 @@ export const s3 = (config: S3StrategyConfig): RPCClientStrategy<ContentProcedure
             Key: payload.toBase58(),
           }),
         );
-        return result.Body?.transformToByteArray();
+        return await result.Body?.transformToByteArray();
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return;

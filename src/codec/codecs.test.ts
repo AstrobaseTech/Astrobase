@@ -36,7 +36,7 @@ describe('CodecRegistry', () => {
         expect(CodecRegistry.get(key, instanceID))[
           sdkSupportedKeys.includes(key as never) ? 'toBeDefined' : 'toBeUndefined'
         ]();
-        expect(CodecRegistry.register({ key, strategy }, { instanceID })).toBeUndefined();
+        expect(() => CodecRegistry.register({ key, strategy }, { instanceID })).not.toThrow();
         expect(CodecRegistry.get(key, instanceID)).toBe(strategy);
       });
     }
@@ -83,23 +83,23 @@ describe('CodecRegistry', () => {
 
 const input = crypto.getRandomValues(new Uint8Array(8));
 
-test('decodeWithCodec & encodeWithCodec throw if no codec available', () => {
+test('decodeWithCodec & encodeWithCodec throw if no codec available', async () => {
   const type = 'test/no-codec';
   const instanceID = type;
   for (const mediaType of [type, { type }]) {
     for (const fn of [decodeWithCodec, encodeWithCodec]) {
-      expect(fn(input, mediaType, instanceID)).rejects.toThrow('Strategy not found');
+      await expect(fn(input, mediaType, instanceID)).rejects.toThrow('Strategy not found');
     }
   }
 });
 
-test('decodeWithCodec & encodeWithCodec both work', () => {
+test('decodeWithCodec & encodeWithCodec both work', async () => {
   const key = 'test/decode-encode';
   const instanceID = key;
   CodecRegistry.register({ strategy: validStrategy }, { key, instanceID });
   for (const k of [key, { type: key }]) {
     for (const fn of [decodeWithCodec, encodeWithCodec]) {
-      expect(fn(input, k, instanceID)).resolves.toEqual(input);
+      await expect(fn(input, k, instanceID)).resolves.toEqual(input);
     }
   }
 });

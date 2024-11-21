@@ -3,7 +3,6 @@ import { join, resolve } from 'path';
 
 import type { ContentIdentifier } from '../identifiers/identifiers.js';
 import type { RPCClientStrategy } from '../rpc/client/types.js';
-import type { ContentProcedures } from '../rpc/shared/index.js';
 
 export interface FsOptions {
   dir: string;
@@ -15,9 +14,7 @@ export interface FsOptions {
  * @param options The {@linkcode FsOptions} object containing the target directory path.
  * @returns A promise that resolves with the the {@linkcode RPCClientStrategy}.
  */
-export async function filesystem(
-  options: FsOptions,
-): Promise<RPCClientStrategy<ContentProcedures>> {
+export async function filesystem(options: FsOptions): Promise<RPCClientStrategy> {
   const dir = resolve(options.dir);
 
   const [isDir] = await Promise.all([
@@ -40,7 +37,7 @@ export async function filesystem(
           const buf = await readFile(j(cid));
           return new Uint8Array(buf);
         } catch (e) {
-          if ((e as any)?.code === 'ENOENT') {
+          if ((e as { code: string } | undefined)?.code === 'ENOENT') {
             return;
           }
           throw e;

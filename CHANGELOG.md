@@ -12,6 +12,7 @@
 
 - Changed middleware processing to recurse on arrays and simple objects only.
 - Changed middleware processing to skip number and boolean primitive types.
+- Removed type parameter from `decodeWithCodec`.
 
 ### Fixed
 

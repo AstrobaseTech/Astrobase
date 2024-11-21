@@ -159,7 +159,7 @@ export class Registry<K extends RegistryKey, T, D extends K = K> {
     return (
       this.instance[instanceID]?.get(key) ??
       this.global.get(key) ??
-      (this.options?.defaults as Record<K, T>)?.[key]
+      (this.options?.defaults as Record<K, T> | undefined)?.[key]
     );
   }
 
@@ -194,7 +194,7 @@ export class Registry<K extends RegistryKey, T, D extends K = K> {
       throw new TypeError('Invalid strategy');
     }
     let key = options?.key ?? module.key;
-    if (key === undefined || key === null) {
+    if (key === undefined) {
       throw new TypeError('No key provided');
     }
     key = key instanceof Array ? key : [key];

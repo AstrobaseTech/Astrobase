@@ -11,7 +11,7 @@ describe('Scheme Registry', () => {
 
   test('Key validation', () => {
     for (const key of [0, 2]) {
-      expect(SchemeRegistry.register({ key, strategy }, { instanceID })).toBeUndefined();
+      expect(() => SchemeRegistry.register({ key, strategy }, { instanceID })).not.toThrow();
     }
     for (const key of [2.1, '2.1', '2'] as never[]) {
       expect(() => SchemeRegistry.register({ key, strategy }, { instanceID })).toThrow(
@@ -21,7 +21,7 @@ describe('Scheme Registry', () => {
   });
 
   test('Strategy validation', () => {
-    expect(SchemeRegistry.register({ key: 3, strategy })).toBeUndefined();
+    expect(() => SchemeRegistry.register({ key: 3, strategy })).not.toThrow();
     expect(() => SchemeRegistry.register({ key: 4 } as never)).toThrow('Invalid strategy');
     expect(() => SchemeRegistry.register({ key: 4, parse: '' } as never)).toThrow(
       'Invalid strategy',

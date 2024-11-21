@@ -45,7 +45,7 @@ describe('Registry', () => {
       });
 
       const validThing = { key: 1, strategy: 'test' };
-      expect(registry.register(validThing)).toBeUndefined();
+      expect(() => registry.register(validThing)).not.toThrow();
       expect(registry.get(validThing.key)).toBe(validThing.strategy);
 
       const invalidThing = { key: 2, strategy: 'invalid' };
@@ -55,8 +55,8 @@ describe('Registry', () => {
 
     test('Key is required', () => {
       const registry = new Registry();
-      expect(registry.register({ key: 1, strategy: {} })).toBeUndefined();
-      expect(registry.register({ strategy: {} }, { key: 2 })).toBeUndefined();
+      expect(() => registry.register({ key: 1, strategy: {} })).not.toThrow();
+      expect(() => registry.register({ strategy: {} }, { key: 2 })).not.toThrow();
       expect(() => registry.register({ strategy: {} })).toThrow('No key provided');
     });
 
@@ -66,7 +66,7 @@ describe('Registry', () => {
       });
 
       const validThing = { key: 1, strategy: {} };
-      expect(registry.register(validThing)).toBeUndefined();
+      expect(() => registry.register(validThing)).not.toThrow();
       expect(registry.get(validThing.key)).toBe(validThing.strategy);
 
       const invalidThing = { key: '2', strategy: {} };
@@ -82,7 +82,7 @@ describe('Registry', () => {
 
       const newValue = { key: 1, strategy: {} };
       expect(() => registry.register(newValue)).toThrow('Key in use');
-      expect(registry.register(newValue, { force: true })).toBeUndefined();
+      expect(() => registry.register(newValue, { force: true })).not.toThrow();
       expect(registry.get(1)).toBe(newValue.strategy);
     });
 

@@ -62,10 +62,7 @@ async function swap(
 
       // Execute middleware
       for (const middleware of middlewares) {
-        const func = middleware[fn];
-        if (func) {
-          value = await Promise.resolve(func(key, value, { instanceID }));
-        }
+        value = await Promise.resolve(middleware[fn](key, value, { instanceID }));
       }
 
       // Recurse on arrays and simple objects

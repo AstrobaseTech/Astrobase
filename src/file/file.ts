@@ -40,7 +40,7 @@ export class File<T = unknown> {
   /**
    * Set the raw buffer of the file.
    *
-   * @returns The file, for method chaining.
+   * @returns This file for method chaining.
    */
   setBuffer(fileBuffer: ArrayLike<number> | ArrayBufferLike) {
     this.buffer = fileBuffer;
@@ -123,7 +123,7 @@ export class File<T = unknown> {
    *
    * @param timestamp The number of seconds since Unix epoch. If omitted, the current time will be
    *   used.
-   * @returns The file, for method chaining.
+   * @returns This file for method chaining.
    * @throws `TypeError` if the file version is unsupported.
    */
   setTimestamp(timestamp = Math.floor(Date.now() / 1000)) {
@@ -134,7 +134,7 @@ export class File<T = unknown> {
   /**
    * Clear's the file's Unix timestamp.
    *
-   * @returns The file, for method chaining.
+   * @returns This file for method chaining.
    * @throws `TypeError` if the file version is unsupported.
    */
   clearTimestamp() {
@@ -191,7 +191,7 @@ export class File<T = unknown> {
    * Sets the file's media type.
    *
    * @param mediaType The media type string or object.
-   * @returns The file, for method chaining.
+   * @returns This file for method chaining.
    * @throws `TypeError` if the file version is unsupported.
    */
   setMediaType(mediaType: string | MediaType) {
@@ -234,7 +234,7 @@ export class File<T = unknown> {
    * Sets the file's payload.
    *
    * @param payload The payload.
-   * @returns The file, for method chaining.
+   * @returns This file for method chaining.
    * @throws `TypeError` if the file version is unsupported.
    */
   setPayload(payload: ArrayLike<number> | ArrayBufferLike) {
@@ -247,13 +247,15 @@ export class File<T = unknown> {
    * return the same as `.payload`. Otherwise, it will attempt to decode with the registered codec
    * for the media type and return the result.
    *
-   * @template T The type of the returned codec-decoded result.
    * @param instanceID The instance ID to use when looking up available codecs.
+   * @returns A promise that resolves with the decoded content. The type of the content is unknown,
+   *   as we cannot anticipate how registered middleware will behave. You will need to assert the
+   *   output type yourself.
    * @throws `TypeError` if the file version is unsupported.
    */
   async getValue(instanceID?: string) {
     return this.mediaType
-      ? decodeWithCodec<T>(this.payload, this.mediaType.value, instanceID)
+      ? decodeWithCodec(this.payload, this.mediaType.value, instanceID)
       : this.payload;
   }
 
@@ -265,7 +267,7 @@ export class File<T = unknown> {
    *   inlining the value parameter.
    * @param value The value to encode and use as the file payload.
    * @param instanceID The instance ID to use when looking up available codecs.
-   * @returns The file, for method chaining.
+   * @returns A promise that resolves with this file for method chaining.
    * @throws `TypeError` if the file version is unsupported.
    */
   async setValue(value: T, instanceID?: string) {

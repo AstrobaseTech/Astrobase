@@ -74,7 +74,7 @@ export const CodecRegistry = new Registry<string, Codec, TDefaultMediaType>({
       decode: (payload) => JSON.parse(new TextDecoder().decode(payload)) as unknown,
       encode: (data) => new TextEncoder().encode(JSON.stringify(data)),
       middlewares: [BinaryMiddleware],
-    } satisfies Codec<unknown>,
+    } satisfies Codec,
     'application/octet-stream': {
       decode: (v) => v,
       encode: (v) => v,
@@ -92,19 +92,20 @@ export const CodecRegistry = new Registry<string, Codec, TDefaultMediaType>({
  * Decodes binary content using the registered {@linkcode Codec} for the given media type and
  * instance.
  *
- * @template T The type of the decoded content.
  * @param payload The binary content to decode.
  * @param mediaType The media type of the content.
  * @param instanceID The target instance for {@linkcode Codec} resolution.
- * @returns A promise that resolves with the decoded content of type `T`.
+ * @returns A promise that resolves with the decoded content. The type of the content is unknown, as
+ *   we cannot anticipate how registered middleware will behave. You will need to assert the output
+ *   type yourself.
  */
-export async function decodeWithCodec<T>(
+export async function decodeWithCodec(
   payload: Uint8Array,
   mediaType: string | MediaType,
   instanceID = '',
 ) {
   mediaType = typeof mediaType === 'string' ? parse(mediaType) : mediaType;
-  const codec = CodecRegistry.getStrict(mediaType.type, instanceID) as Codec<T>;
+  const codec = CodecRegistry.getStrict(mediaType.type, instanceID);
   const middlewares = (codec.middlewares ?? []).concat(getMiddlewares(instanceID));
   const data = await codec.decode(payload, { instanceID, mediaType });
   return revive(data, middlewares, instanceID);

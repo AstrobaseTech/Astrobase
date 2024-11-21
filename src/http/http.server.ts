@@ -1,5 +1,6 @@
 import { createServer, ServerResponse } from 'http';
 import { processRequest } from '../rpc/server.js';
+import type { RequestMessage } from '../rpc/shared/types/messages.js';
 
 export interface HttpOptions {
   /**
@@ -28,11 +29,11 @@ export function serve(options?: HttpOptions) {
       validate(res, req.headers['content-type'] === 'application/json', 415)
     ) {
       let data = '';
-      req.on('data', (chunk) => (data += chunk));
+      req.on('data', (chunk) => (data += chunk as string));
       req.on('end', async () => {
         let reqMsg;
         try {
-          reqMsg = JSON.parse(data);
+          reqMsg = JSON.parse(data) as RequestMessage<string, unknown>;
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
           res

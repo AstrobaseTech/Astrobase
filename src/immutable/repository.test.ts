@@ -30,8 +30,8 @@ describe(instanceID, () => {
         ['Uint8Array', hash.bytes],
       ] as const
     ).forEach(([name, cidLike], i) =>
-      test(`With ${name}`, () => {
-        expect(deleteImmutable(cidLike, instanceID)).resolves.toBeUndefined();
+      test(`With ${name}`, async () => {
+        await expect(deleteImmutable(cidLike, instanceID)).resolves.toBeUndefined();
         expect(deleteHandler).toBeCalledTimes(i + 1);
         expect(deleteHandler).lastCalledWith(cid, instanceID);
       }),
@@ -67,28 +67,28 @@ describe(instanceID, () => {
 
     let i = 0;
 
-    test('Found and valid', () => {
-      expect(getImmutable<unknown>(fileHash, instanceID)).resolves.toEqual(file);
+    test('Found and valid', async () => {
+      await expect(getImmutable<unknown>(fileHash, instanceID)).resolves.toEqual(file);
       expect(getHandler).toBeCalledTimes(++i);
       expect(getHandler).lastCalledWith(fileCID, instanceID);
       expect(getHandler).lastReturnedWith(Promise.resolve(file.buffer));
     });
 
-    test('Found but invalid', () => {
+    test('Found but invalid', async () => {
       for (const cid of invalidCIDs) {
-        expect(getImmutable<unknown>(cid.rawValue, instanceID)).resolves.toBeUndefined();
+        await expect(getImmutable<unknown>(cid.rawValue, instanceID)).resolves.toBeUndefined();
         expect(getHandler).toBeCalledTimes(++i);
         expect(getHandler).lastCalledWith(cid, instanceID);
         expect(getHandler).lastReturnedWith(Promise.resolve(file.buffer));
       }
     });
 
-    test('Not found', () => {
+    test('Not found', async () => {
       const cid = toImmutableCID([
         HashAlgorithm.SHA256,
         ...crypto.getRandomValues(new Uint8Array(32)),
       ]);
-      expect(getImmutable<unknown>(cid.rawValue, instanceID)).resolves.toBeUndefined();
+      await expect(getImmutable<unknown>(cid.rawValue, instanceID)).resolves.toBeUndefined();
       expect(getHandler).toBeCalledTimes(++i);
       expect(getHandler).lastCalledWith(cid, instanceID);
       expect(getHandler).lastReturnedWith(Promise.resolve());
