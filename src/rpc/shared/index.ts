@@ -1,8 +1,9 @@
 /**
- * Types used by RPC client and RPC server alike.
+ * Types and validation schemas that may be used by RPC client and RPC server alike.
  *
  * @module RPC/Shared
  */
 
-export type * from './types/messages.js';
-export type * from './types/procedures.js';
+export * from './request.js';
+export type * from './messages.js';
+export type * from './procedures.js';

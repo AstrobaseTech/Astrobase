@@ -1,6 +1,6 @@
 import { createServer, ServerResponse } from 'http';
 import { processRequest } from '../rpc/server.js';
-import type { RequestMessage } from '../rpc/shared/types/messages.js';
+import { validateRequest } from '../rpc/shared/request.js';
 
 export interface HttpOptions {
   /**
@@ -31,24 +31,25 @@ export function serve(options?: HttpOptions) {
       let data = '';
       req.on('data', (chunk) => (data += chunk as string));
       req.on('end', async () => {
-        let reqMsg;
         try {
-          reqMsg = JSON.parse(data) as RequestMessage<string, unknown>;
+          const reqMsg = validateRequest(JSON.parse(data));
+
+          try {
+            const resMsg = JSON.stringify(await processRequest(reqMsg));
+            res.writeHead(200, { 'content-type': 'application/json' }).end(resMsg);
+          } catch (e) {
+            // TODO: appropriate response for unsupported procedures, or procedure threw an error
+            res.writeHead(500).end();
+            // eslint-disable-next-line no-console
+            console.error(e);
+            return;
+          }
+
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
           res
             .writeHead(400, { 'content-type': 'text/plain' })
-            .end('Request body is not valid JSON');
-          return;
-        }
-
-        try {
-          const resMsg = JSON.stringify(await processRequest(reqMsg));
-          res.writeHead(200, { 'content-type': 'application/json' }).end(resMsg);
-        } catch (e) {
-          res.writeHead(500).end();
-          // eslint-disable-next-line no-console
-          console.error(e);
+            .end('Request body is not a valid JSON request message');
         }
       });
     }

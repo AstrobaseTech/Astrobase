@@ -1,4 +1,4 @@
-import type { ContentIdentifier } from '../../../identifiers/identifiers.js';
+import type { ContentIdentifier } from '../../identifiers/identifiers.js';
 
 /** An interface that describes the request and response types for a set of procedure kinds. */
 export type ProcedureConfig = {
