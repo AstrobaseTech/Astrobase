@@ -2,7 +2,8 @@
 
 import type { MaybePromise } from '../internal/index.js';
 import { Registry } from '../registry/registry.js';
-import type { RequestMessage, ResponseMessage } from './shared/index.js';
+import { deleteContent, getContent, putContent } from '../repository/repository.js';
+import type { PutRequestPayload, RequestMessage, ResponseMessage } from './shared/index.js';
 
 /**
  * A handler function for RPC requests.
@@ -22,6 +23,15 @@ export type RequestHandler<Req, Res> = (request: Req, instanceID?: string) => Ma
 export const HandlerRegistry = new Registry<string, RequestHandler<unknown, unknown>>({
   validateKey: (key) => typeof key === 'string',
   validateStrategy: (strategy) => typeof strategy === 'function',
+  defaults: {
+    // TODO: fix types, or rather validate them
+    'content:delete': deleteContent as RequestHandler<unknown, unknown>,
+    'content:get': getContent as RequestHandler<unknown, unknown>,
+    'content:put': (req, instanceID) =>
+      putContent((req as PutRequestPayload).cid, (req as PutRequestPayload).content, {
+        instanceID,
+      }),
+  },
 });
 
 /**

@@ -1,6 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type * as T from '../shared/index.js';
-import { LocalFallbackClient } from './local-fallback-client.js';
 import type { RPCClientConfig } from './types.js';
 
 /**
@@ -23,7 +22,7 @@ import type { RPCClientConfig } from './types.js';
  * You will need to keep a reference to the {@linkcode RPCClientConfig} object around in order to
  * unregister it later.
  */
-export const clients = new Set<RPCClientConfig>([LocalFallbackClient]);
+export const clients = new Set<RPCClientConfig>();
 
 /**
  * A client that has been filtered and normalised for processing requests of a particular procedure

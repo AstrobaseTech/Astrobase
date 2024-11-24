@@ -8,12 +8,14 @@
 - Added a `http` RPC server via `@astrobase/core/http`.
 - Added a `astrobase` HTTP daemon binary.
 - Added `validateRequest` function for runtime validation of RPC request messages.
+- Added request handlers for content procedures.
 
 ### Changed
 
 - Changed middleware processing to recurse on arrays and simple objects only.
 - Changed middleware processing to skip number and boolean primitive types.
 - Removed type parameter from `decodeWithCodec`.
+- Removed `LocalFallbackClient`.
 
 ### Fixed
 
