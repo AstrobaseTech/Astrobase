@@ -1,8 +1,10 @@
 import { createServer, ServerResponse } from 'http';
+import { decodeWithCodec, encodeWithCodec } from '../codec/codecs.js';
 import { processRequest } from '../rpc/server.js';
 import { validateRequest } from '../rpc/shared/request.js';
 
-export interface HttpOptions {
+/** A HTTP server configuration. */
+export interface HttpServerConfig {
   /**
    * Port number to use.
    *
@@ -18,28 +20,35 @@ export interface HttpOptions {
   apiPath?: string;
 }
 
-export function serve(options?: HttpOptions) {
-  const apiPath = options?.apiPath ?? '/astrobase';
-  const port = options?.port ?? 3000;
+/**
+ * Spins up a HTTP server.
+ *
+ * @param config {@linkcode HttpServerConfig}
+ */
+export function serve(config?: HttpServerConfig) {
+  const apiPath = config?.apiPath ?? '/astrobase';
+  const port = config?.port ?? 3000;
 
   return createServer((req, res) => {
     if (
       validate(res, req.url === apiPath, 404) &&
       validate(res, req.method === 'POST', 405) &&
-      validate(res, req.headers['content-type'] === 'application/json', 415)
+      validate(res, !!req.headers['content-type'], 415)
     ) {
       let data = '';
-      req.on('data', (chunk) => (data += chunk as string));
+      req.on('data', (chunk: string) => (data += chunk));
       req.on('end', async () => {
         try {
-          const reqMsg = validateRequest(JSON.parse(data));
+          const reqMsg = validateRequest(
+            await decodeWithCodec(new TextEncoder().encode(data), req.headers['content-type']!),
+          );
 
           try {
-            const resMsg = JSON.stringify(await processRequest(reqMsg));
+            const resMsg = await encodeWithCodec(await processRequest(reqMsg), 'application/json');
             res.writeHead(200, { 'content-type': 'application/json' }).end(resMsg);
           } catch (e) {
             // TODO: appropriate response for unsupported procedures, or procedure threw an error
-            res.writeHead(500).end();
+            res.writeHead(500, { 'content-type': 'text/plain' }).end('Unable to process request');
             // eslint-disable-next-line no-console
             console.error(e);
             return;
@@ -47,9 +56,8 @@ export function serve(options?: HttpOptions) {
 
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
-          res
-            .writeHead(400, { 'content-type': 'text/plain' })
-            .end('Request body is not a valid JSON request message');
+          // TODO: appropriate response for unsupported content type
+          res.writeHead(400, { 'content-type': 'text/plain' }).end('Invalid request body');
         }
       });
     }
