@@ -65,7 +65,7 @@
   ],
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json --removeComments && tsc --project tsconfig.build.json --declaration --declarationMap --emitDeclarationOnly",
     "postbuild": "publint",
     "build:diagrams": "plantuml docs/*.puml",
     "build:docs": "typedoc --validation",

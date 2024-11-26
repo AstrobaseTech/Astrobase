@@ -2,8 +2,6 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
-    "declaration": true,
-    "declarationMap": true,
     "resolveJsonModule": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
