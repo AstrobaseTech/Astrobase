@@ -9,6 +9,7 @@
 - Added a `astrobase` HTTP daemon binary.
 - Added `validateRequest` function for runtime validation of RPC request messages.
 - Added request handlers for content procedures.
+- Added `MaybePromise` support for `RPCClientStrategy` procedure implementations.
 
 ### Changed
 
@@ -16,6 +17,7 @@
 - Changed middleware processing to skip number and boolean primitive types.
 - Removed type parameter from `decodeWithCodec`.
 - Removed `LocalFallbackClient`.
+- Comments (including JSDoc) are stripped from transpiled JS. They are still available in declaration files.
 
 ### Fixed
 

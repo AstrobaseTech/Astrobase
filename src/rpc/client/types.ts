@@ -1,3 +1,4 @@
+import type { MaybePromise } from '../../internal/index.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type * as T from '../shared/index.js';
 
@@ -16,7 +17,7 @@ export interface RPCClientStrategy<T extends T.ProcedureConfig = T.CoreProcedure
    * @param instanceID The target instance for the request.
    * @returns The response payload promise.
    */
-  fallback?(procedure: string, payload: unknown, instanceID?: string): Promise<unknown>;
+  fallback?(procedure: string, payload: unknown, instanceID?: string): MaybePromise<unknown>;
   /** A map of procedure kinds to their specific implementation function. */
   procedures?: {
     /**
@@ -30,7 +31,7 @@ export interface RPCClientStrategy<T extends T.ProcedureConfig = T.CoreProcedure
     [K in T.Procedure<T>]: (
       payload: T.ProcedureRequest<T, K>,
       instanceID?: string,
-    ) => Promise<T.ProcedureResponse<T, K>>;
+    ) => MaybePromise<T.ProcedureResponse<T, K>>;
   };
 }
 

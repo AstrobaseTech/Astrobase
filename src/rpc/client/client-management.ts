@@ -1,3 +1,4 @@
+import type { MaybePromise } from '../../internal/index.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type * as T from '../shared/index.js';
 import type { RPCClientConfig } from './types.js';
@@ -63,14 +64,18 @@ export function getFilteredClients<
     let strategy: FilteredClient<T, P>['strategy'];
     if (client.strategy.procedures?.[procedure]) {
       strategy = (payload) =>
-        client.strategy.procedures![procedure](payload, instanceID) as Promise<
-          T.ProcedureResponse<T, P>
-        >;
+        Promise.resolve(
+          client.strategy.procedures![procedure](payload, instanceID) as MaybePromise<
+            T.ProcedureResponse<T, P>
+          >,
+        );
     } else if (client.strategy.fallback) {
       strategy = (payload) =>
-        client.strategy.fallback!(procedure, payload, instanceID) as Promise<
-          T.ProcedureResponse<T, P>
-        >;
+        Promise.resolve(
+          client.strategy.fallback!(procedure, payload, instanceID) as MaybePromise<
+            T.ProcedureResponse<T, P>
+          >,
+        );
     } else {
       continue;
     }
