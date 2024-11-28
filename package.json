@@ -29,7 +29,11 @@
       "types": "./dist/src/fs/fs.client.d.ts",
       "default": "./dist/src/fs/fs.client.js"
     },
-    "./http": {
+    "./http/client": {
+      "types": "./dist/src/http/http.client.d.ts",
+      "default": "./dist/src/http/http.client.js"
+    },
+    "./http/server": {
       "types": "./dist/src/http/http.server.d.ts",
       "default": "./dist/src/http/http.server.js"
     },

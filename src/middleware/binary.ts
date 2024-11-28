@@ -1,3 +1,4 @@
+import { File } from '../file/file.js';
 import { ContentIdentifier } from '../identifiers/identifiers.js';
 import { Base58, Base64, type BaseEncoder } from '../internal/encoding.js';
 import type { Middleware } from './types.js';
@@ -19,6 +20,9 @@ export const BinaryMiddleware = {
     if (value instanceof ArrayBuffer || value instanceof Uint8Array) {
       return `$bin:b64:${Base64.encode(new Uint8Array(value))}`;
     }
+    if (value instanceof File) {
+      return `$content:b64:${Base64.encode(value.buffer)}`;
+    }
     return value;
   },
 
@@ -30,13 +34,15 @@ export const BinaryMiddleware = {
    * @returns A binary stream, or the original value if not a supported string.
    */
   reviver(_: unknown, value: unknown) {
-    if (
-      typeof value !== 'string' ||
-      value.length < 9 ||
-      !value.startsWith('$') ||
-      value.charAt(4) !== ':' ||
-      value.charAt(8) !== ':'
-    ) {
+    if (typeof value !== 'string' || value.length < 9 || !value.startsWith('$')) {
+      return value;
+    }
+
+    if (value.slice(1, 12) === 'content:b64') {
+      return new File(Base64.decode(value.slice(13)));
+    }
+
+    if (value.charAt(4) !== ':' || value.charAt(8) !== ':') {
       return value;
     }
 

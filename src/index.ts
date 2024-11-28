@@ -2,6 +2,7 @@
 
 export * from './core.js';
 export * from './fs/fs.client.js';
+export * from './http/http.client.js';
 export * from './http/http.server.js';
 export * from './indexeddb/indexeddb.js';
 export * from './rpc/client/index.js';
