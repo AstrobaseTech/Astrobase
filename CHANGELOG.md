@@ -10,6 +10,7 @@
 - Added `validateRequest` function for runtime validation of RPC request messages.
 - Added request handlers for content procedures.
 - Added `MaybePromise` support for `RPCClientStrategy` procedure implementations.
+- Added `File` instance serialization.
 
 ### Changed
 
