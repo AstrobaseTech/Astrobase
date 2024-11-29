@@ -1,3 +1,5 @@
+/** @module HTTP/Client */
+
 import { decodeWithCodec, encodeWithCodec } from '../codec/codecs.js';
 import type { RPCClientStrategy } from '../rpc/client/types.js';
 import type { ResponseMessage } from '../rpc/shared/messages.js';

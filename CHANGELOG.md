@@ -4,9 +4,8 @@
 
 ### Added
 
-- Added a `filesystem` RPC client for content procedures via `@astrobase/core/fs`.
-- Added support for `http` via `@astrobase/core/http/client` and `@astrobase/core/http/server`.
-- Added a `astrobase` HTTP daemon binary.
+- Added modules `@astrobase/core/config`, `@astrobase/core/fs`, `@astrobase/core/http/client`, and `@astrobase/core/http/server`.
+- Added a `astrobase` command line utility.
 - Added `validateRequest` function for runtime validation of RPC request messages.
 - Added request handlers for content procedures.
 - Added `MaybePromise` support for `RPCClientStrategy` procedure implementations.

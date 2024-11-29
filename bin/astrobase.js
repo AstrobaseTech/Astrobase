@@ -1,5 +1,5 @@
 #!/usr/bin/env node
 
-import { serve } from '../src/http/http.server.js';
+import { loadConfig } from '../src/config/load.js';
 
-serve();
+loadConfig();

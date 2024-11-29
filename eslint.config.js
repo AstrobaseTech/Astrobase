@@ -20,6 +20,7 @@ export default ts.config(
   {
     rules: {
       '@typescript-eslint/no-confusing-void-expression': ['error', { ignoreArrowShorthand: true }],
+      '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/no-invalid-void-type': 'warn',
       '@typescript-eslint/no-misused-promises': [
         'error',

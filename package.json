@@ -25,6 +25,10 @@
       "types": "./dist/src/core.d.ts",
       "default": "./dist/src/core.js"
     },
+    "./config": {
+      "types": "./dist/src/config/index.d.ts",
+      "default": "./dist/src/config/index.js"
+    },
     "./fs": {
       "types": "./dist/src/fs/fs.client.d.ts",
       "default": "./dist/src/fs/fs.client.js"

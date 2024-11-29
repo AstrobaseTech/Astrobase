@@ -1,3 +1,5 @@
+/** @module FS */
+
 import { access, constants, readFile, rm, stat, writeFile } from 'fs/promises';
 import { join, resolve } from 'path';
 

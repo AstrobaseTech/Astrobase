@@ -2,9 +2,13 @@
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": [
     "./src/codec/codecs.ts",
+    "./src/config/index.ts",
     "./src/encoding/index.ts",
     "./src/file/index.ts",
+    "./src/fs/fs.client.ts",
     "./src/hashes/index.ts",
+    "./src/http/http.client.ts",
+    "./src/http/http.server.ts",
     "./src/identifiers/identifiers.ts",
     "./src/immutable/index.ts",
     "./src/indexeddb/indexeddb.ts",

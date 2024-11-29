@@ -1,3 +1,5 @@
+/** @module HTTP/Server */
+
 import { createServer, ServerResponse } from 'http';
 import { decodeWithCodec, encodeWithCodec } from '../codec/codecs.js';
 import { processRequest } from '../rpc/server.js';
