@@ -1,4 +1,4 @@
-import { decode, encodingLength } from 'varint';
+import v from 'varint';
 
 /** Parses a Protobuf style varint within a buffer. */
 export class Varint {
@@ -9,11 +9,11 @@ export class Varint {
 
   /** The integer value of the varint. */
   get value() {
-    return decode(this.buffer, this.offset);
+    return v.decode(this.buffer, this.offset);
   }
 
   /** The number of bytes that the integer uses when encoded as varint. */
   get encodingLength() {
-    return encodingLength(this.value);
+    return v.encodingLength(this.value);
   }
 }
