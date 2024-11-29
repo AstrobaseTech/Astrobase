@@ -87,7 +87,7 @@
     "lint": "conc npm:lint:*",
     "lint:eslint": "eslint .",
     "lint:typedoc": "typedoc --validation --emit none",
-    "prepack": "npm run ci",
+    "prepublishOnly": "npm run ci",
     "serve": "node --watch dist/bin/astrobase.js",
     "start": "conc -k npm:start:*",
     "start:code": "tsc --watch --preserveWatchOutput --project tsconfig.build.json --removeComments",
