@@ -41,10 +41,10 @@ test('HTTP', () =>
     clients.add(mock);
 
     const server = serve({ instanceID: 'http-server' }).on('listening', async () => {
-      await expect(client.fallback('content:delete', cid, 'http-server')).resolves.toBeUndefined();
-      await expect(client.fallback('content:get', cid, 'http-server')).resolves.toEqual(content);
+      await expect(client.fallback!('content:delete', cid, 'http-server')).resolves.toBeUndefined();
+      await expect(client.fallback!('content:get', cid, 'http-server')).resolves.toEqual(content);
       await expect(
-        client.fallback('content:put', { cid, content: content.buffer }, 'http-server'),
+        client.fallback!('content:put', { cid, content: content.buffer }, 'http-server'),
       ).resolves.toBeUndefined();
       clients.delete(mock);
       server.close(() => res());
