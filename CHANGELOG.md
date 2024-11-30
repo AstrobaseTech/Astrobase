@@ -4,7 +4,7 @@
 
 ### Added
 
-- Added modules `@astrobase/core/config`, `@astrobase/core/fs`, `@astrobase/core/http/client`, and `@astrobase/core/http/server`.
+- Added modules `config`, `fs`, `http/client`, `http/server`, and `sqlite`.
 - Added a `astrobase` command line utility.
 - Added `validateRequest` function for runtime validation of RPC request messages.
 - Added request handlers for content procedures.
