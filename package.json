@@ -74,9 +74,9 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "conc npm:build:code npm:build:declaration",
+    "postbuild": "publint",
     "build:code": "tsc --project tsconfig.build.json --removeComments",
     "build:declaration": "tsc --project tsconfig.build.json --declaration --declarationMap --emitDeclarationOnly",
-    "postbuild": "publint",
     "build:diagrams": "plantuml docs/*.puml",
     "build:docs": "typedoc --validation",
     "ci": "conc npm:build npm:lint npm:test",
@@ -90,12 +90,12 @@
     "prepublishOnly": "npm run ci",
     "serve": "node --watch dist/bin/astrobase.js",
     "start": "conc -k npm:start:*",
-    "start:code": "tsc --watch --preserveWatchOutput --project tsconfig.build.json --removeComments",
-    "start:declaration": "tsc --watch --preserveWatchOutput --project tsconfig.build.json --declaration --declarationMap --emitDeclarationOnly",
+    "start:code": "npm run build:code -- --watch --preserveWatchOutput ",
+    "start:declaration": "npm run build:declaration -- --watch --preserveWatchOutput",
     "test": "vitest run",
     "watch": "conc -k npm:watch:*",
-    "watch:code": "tsc --watch --preserveWatchOutput --noEmit --project tsconfig.build.json --removeComments",
-    "watch:declaration": "tsc --watch --preserveWatchOutput --noEmit --project tsconfig.build.json --declaration --declarationMap --emitDeclarationOnly"
+    "watch:code": "npm run start:code -- --noEmit",
+    "watch:declaration": "npm run start:declaration -- --noEmit"
   },
   "dependencies": {
     "base-x": "5.0.0",
