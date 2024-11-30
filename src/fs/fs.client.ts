@@ -1,4 +1,8 @@
-/** @module FS */
+/**
+ * Adds support for using the native filesystem for content storage and retrieval.
+ *
+ * @module FS
+ */
 
 import { access, constants, readFile, rm, stat, writeFile } from 'fs/promises';
 import { join, resolve } from 'path';
@@ -6,17 +10,22 @@ import { join, resolve } from 'path';
 import type { ContentIdentifier } from '../identifiers/identifiers.js';
 import type { RPCClientStrategy } from '../rpc/client/types.js';
 
-export interface FsOptions {
+/** A filesystem client configuration object. */
+export interface FilesystemClientConfig {
+  /**
+   * The target directory for content storage. Note that the directory must exist - it will not be
+   * automatically created.
+   */
   dir: string;
 }
 
 /**
- * Creates an RPC client for persisting content to via the filesystem.
+ * Creates an {@linkcode RPCClientStrategy} for the native filesystem.
  *
- * @param options The {@linkcode FsOptions} object containing the target directory path.
+ * @param options The {@linkcode FilesystemClientConfig} object containing the target directory path.
  * @returns A promise that resolves with the the {@linkcode RPCClientStrategy}.
  */
-export async function filesystem(options: FsOptions): Promise<RPCClientStrategy> {
+export default async function (options: FilesystemClientConfig): Promise<RPCClientStrategy> {
   const dir = resolve(options.dir);
 
   const [isDir] = await Promise.all([
