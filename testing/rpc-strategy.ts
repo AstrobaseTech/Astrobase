@@ -14,9 +14,12 @@ export function testRPCStrategyForContent(
     const content = new TextEncoder().encode('test');
     const cid = new ContentIdentifier(content);
 
-    await expect(procedures['content:put']({ cid, content })).resolves.toBeUndefined();
-    await expect(procedures['content:get'](cid)).resolves.toEqual(content);
-    await expect(procedures['content:delete'](cid)).resolves.toBeUndefined();
-    await expect(procedures['content:get'](cid)).resolves.toBeUndefined();
+    await expect(Promise.resolve(procedures['content:get'](cid))).resolves.toBeUndefined();
+    await expect(
+      Promise.resolve(procedures['content:put']({ cid, content })),
+    ).resolves.toBeUndefined();
+    await expect(Promise.resolve(procedures['content:get'](cid))).resolves.toEqual(content);
+    await expect(Promise.resolve(procedures['content:delete'](cid))).resolves.toBeUndefined();
+    await expect(Promise.resolve(procedures['content:get'](cid))).resolves.toBeUndefined();
   });
 }

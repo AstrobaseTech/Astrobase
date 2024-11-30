@@ -20,7 +20,8 @@
     "./src/rpc/client/index.ts",
     "./src/rpc/server.ts",
     "./src/rpc/shared/index.ts",
-    "./src/s3/s3.ts"
+    "./src/s3/s3.ts",
+    "./src/sqlite/sqlite.ts"
   ],
   "hideGenerator": true,
   "includeVersion": true,
