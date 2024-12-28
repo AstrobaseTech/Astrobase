@@ -63,7 +63,9 @@ export default function (config: SQLiteClientConfig = {}): RPCClientStrategy {
 
       'content:put': ({ cid, content }) => {
         sql
-          .prepare<[Uint8Array, Uint8Array]>('INSERT INTO astrobase (cid, content) VALUES (?, ?)')
+          .prepare<
+            [Uint8Array, Uint8Array]
+          >('INSERT OR REPLACE INTO astrobase (cid, content) VALUES (?, ?)')
           .run(cid.bytes, content);
       },
     },
