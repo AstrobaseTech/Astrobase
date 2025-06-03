@@ -2,13 +2,15 @@
  * Adds support for using the native filesystem for content storage and retrieval.
  *
  * @module FS
+ * @category API Reference
+ * @experimental
  */
 
 import { access, constants, readFile, rm, stat, writeFile } from 'fs/promises';
 import { join, resolve } from 'path';
-
-import type { ContentIdentifier } from '../identifiers/identifiers.js';
-import type { RPCClientStrategy } from '../rpc/client/types.js';
+import type { ContentIdentifier } from '../cid/cid.js';
+import type { ContentProcedures } from '../content/procedures.js';
+import type { ClientStrategy } from '../rpc/client/client-strategy.js';
 
 /** A filesystem client configuration object. */
 export interface FilesystemClientConfig {
@@ -20,12 +22,14 @@ export interface FilesystemClientConfig {
 }
 
 /**
- * Creates an {@linkcode RPCClientStrategy} for the native filesystem.
+ * Creates an {@link ClientStrategy} for the native filesystem.
  *
- * @param options The {@linkcode FilesystemClientConfig} object containing the target directory path.
- * @returns A promise that resolves with the the {@linkcode RPCClientStrategy}.
+ * @param options The {@link FilesystemClientConfig} object containing the target directory path.
+ * @returns A promise that resolves with the the {@link ClientStrategy}.
  */
-export default async function (options: FilesystemClientConfig): Promise<RPCClientStrategy> {
+export default async function (
+  options: FilesystemClientConfig,
+): Promise<ClientStrategy<ContentProcedures>> {
   const dir = resolve(options.dir);
 
   const [isDir] = await Promise.all([
@@ -41,20 +45,18 @@ export default async function (options: FilesystemClientConfig): Promise<RPCClie
   const j = (cid: ContentIdentifier) => join(dir, cid.toString());
 
   return {
-    procedures: {
-      'content:delete': (cid) => rm(j(cid)),
-      'content:get': async (cid) => {
-        try {
-          const buf = await readFile(j(cid));
-          return new Uint8Array(buf);
-        } catch (e) {
-          if ((e as { code: string } | undefined)?.code === 'ENOENT') {
-            return;
-          }
-          throw e;
+    'content:delete': (cid) => rm(j(cid)),
+    'content:get': async (cid) => {
+      try {
+        const buf = await readFile(j(cid));
+        return new Uint8Array(buf);
+      } catch (e) {
+        if ((e as { code: string } | undefined)?.code === 'ENOENT') {
+          return;
         }
-      },
-      'content:put': ({ cid, content }) => writeFile(j(cid), content),
+        throw e;
+      }
     },
+    'content:put': ({ cid, content }) => writeFile(j(cid), content),
   };
 }

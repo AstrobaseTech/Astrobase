@@ -1,10 +1,8 @@
-/** @module Internal */
-
 /**
- * A value that may or may not be in Promise form.
- *
- * @category MaybePromise
+ * @module Internal
+ * @category API Reference
+ * @experimental
  */
-export type MaybePromise<T> = T | Promise<T>;
 
 export * from './encoding.js';
+export * from './maybe-promise.js';

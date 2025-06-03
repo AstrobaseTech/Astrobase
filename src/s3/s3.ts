@@ -1,10 +1,22 @@
-/** @module S3 */
+/**
+ * Implements a client for S3-compatible APIs that supports content procedures, enabling content
+ * storage & retrieval via an S3-compatible API.
+ *
+ * Requires `@aws-sdk/client-s3`:
+ *
+ *     npm i @aws-sdk/client-s3
+ *
+ * @module S3
+ * @category API Reference
+ * @experimental
+ */
 
 // prettier-ignore
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, type S3Client } from '@aws-sdk/client-s3';
-import type { RPCClientStrategy } from '../rpc/client/types.js';
+import type { ContentProcedures } from '../content/procedures.js';
+import type { ClientStrategy } from '../rpc/client/client-strategy.js';
 
-/** The configuration interface for the S3 {@linkcode RPCClientStrategy}. */
+/** Configuration for {@link s3} {@link ClientStrategy}. */
 export interface S3StrategyConfig {
   /**
    * A configured `S3Client` from the
@@ -16,46 +28,48 @@ export interface S3StrategyConfig {
 }
 
 /**
- * Creates an {@linkcode RPCClientStrategy} for AWS S3 (or other S3-compatible API).
+ * Creates a {@link ClientStrategy} for AWS S3 (or other S3-compatible API).
  *
- * @param config The {@linkcode S3StrategyConfig} configuration object containing the configured
+ * Requires `@aws-sdk/client-s3`:
+ *
+ *     npm i @aws-sdk/client-s3
+ *
+ * @param config The {@link S3StrategyConfig} configuration object containing the configured
  *   `S3Client` and target bucket.
- * @returns The {@linkcode RPCClientStrategy}.
+ * @returns The {@link ClientStrategy}.
  */
-export const s3 = (config: S3StrategyConfig): RPCClientStrategy => ({
-  procedures: {
-    async 'content:delete'(payload) {
-      await config.Client.send(
-        new DeleteObjectCommand({
+export const s3 = (config: S3StrategyConfig): ClientStrategy<ContentProcedures> => ({
+  async 'content:delete'(cid) {
+    await config.Client.send(
+      new DeleteObjectCommand({
+        Bucket: config.Bucket,
+        Key: cid.toString(),
+      }),
+    );
+  },
+
+  async 'content:get'(cid) {
+    try {
+      const result = await config.Client.send(
+        new GetObjectCommand({
           Bucket: config.Bucket,
-          Key: payload.toBase58(),
+          Key: cid.toString(),
         }),
       );
-    },
+      return await result.Body?.transformToByteArray();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      return;
+    }
+  },
 
-    async 'content:get'(payload) {
-      try {
-        const result = await config.Client.send(
-          new GetObjectCommand({
-            Bucket: config.Bucket,
-            Key: payload.toBase58(),
-          }),
-        );
-        return await result.Body?.transformToByteArray();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        return;
-      }
-    },
-
-    async 'content:put'(payload) {
-      await config.Client.send(
-        new PutObjectCommand({
-          Bucket: config.Bucket,
-          Key: payload.cid.toBase58(),
-          Body: payload.content,
-        }),
-      );
-    },
+  async 'content:put'({ cid, content }) {
+    await config.Client.send(
+      new PutObjectCommand({
+        Bucket: config.Bucket,
+        Key: cid.toString(),
+        Body: content,
+      }),
+    );
   },
 });

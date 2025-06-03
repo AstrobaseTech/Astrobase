@@ -1,15 +1,16 @@
 # Changelog
 
-## Unreleased
+## [0.5.0-beta.1](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.5.0-beta.1) - 2025-06-03
+
+> Big update, added a lot of new functionality and redesigned much of the project. As a result, this changelog is probably not exhaustive.
 
 ### Added
 
-- Added modules `config`, `fs`, `http/client`, `http/server`, and `sqlite`.
-- Added a `astrobase` command line utility.
+- Added modules `ascii`, `bip39`, `common`, `ecdsa`, `encrypt`, `events`, `fs`, `http/client`, `http/server`, `identity`, `in-memory`, `instance`, `keyrings`, `media-types`, `sqlite`, `varint`, and `wraps`.
 - Added `validateRequest` function for runtime validation of RPC request messages.
 - Added request handlers for content procedures.
 - Added `MaybePromise` support for `RPCClientStrategy` procedure implementations.
-- Added `File` instance serialization.
+- Added `FileBuilder` instance serialization.
 
 ### Changed
 
@@ -18,11 +19,14 @@
 - Removed type parameter from `decodeWithCodec`.
 - Removed `LocalFallbackClient`.
 - Comments (including JSDoc) are stripped from transpiled JS. They are still available in declaration files.
+- Renamed `File` to `FileBuilder`.
+- Changed File format.
+- Changed instance system.
+- Changed Content Identifier format to bech32.
 
 ### Fixed
 
 - Fixed `ContentIdentifier` instance serialization.
-- Made `putMutable` options param optional.
 - Fixed a rogue conditional `&&` where it should have been `||` while checking for null content in `getContent`.
 
 ## [0.4.0](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.4.0) - 2024-09-21

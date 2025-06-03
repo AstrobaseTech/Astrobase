@@ -1,10 +1,5 @@
+import type { Instance } from '../instance/instance.js';
 import type { MaybePromise } from '../internal/index.js';
-
-/** Additional context properties provided to the middleware. */
-export interface MiddlewareContext {
-  /** The origin instance of invokation. */
-  instanceID: string;
-}
 
 /** A middleware that hooks into the transformation process of structured data. */
 export interface Middleware {
@@ -17,7 +12,7 @@ export interface Middleware {
    *   is part of an array, this will be the value's index number. Otherwise this will be
    *   `undefined`.
    * @param value The value.
-   * @param context Additional properties provided to the middleware.
+   * @param instance The {@link Instance} config.
    * @returns A value to replace the value within the stringified output. If not replacing the
    *   value, the input value should be returned.
    * @throws If performing some validation and it fails, an error should be thrown.
@@ -25,7 +20,7 @@ export interface Middleware {
   replacer: (
     key: string | number | undefined,
     value: unknown,
-    context: MiddlewareContext,
+    instance: Instance,
   ) => MaybePromise<unknown>;
 
   /**
@@ -37,7 +32,7 @@ export interface Middleware {
    *   is part of an array, this will be the value's index number. Otherwise this will be
    *   `undefined`.
    * @param value The value.
-   * @param context Additional properties provided to the middleware.
+   * @param instance The {@link Instance} config.
    * @returns A value to replace the value within the parsed output. If not replacing the value, the
    *   input value should be returned.
    * @throws If performing some validation and it fails, an error should be thrown.
@@ -45,6 +40,6 @@ export interface Middleware {
   reviver: (
     key: string | number | undefined,
     value: unknown,
-    context: MiddlewareContext,
+    instance: Instance,
   ) => MaybePromise<unknown>;
 }

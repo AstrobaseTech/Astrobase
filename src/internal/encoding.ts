@@ -1,5 +1,3 @@
-import base from 'base-x';
-
 /**
  * Implements an encoder that converts values to and from base-x strings and `Uint8Array`.
  *
@@ -21,15 +19,6 @@ export interface BaseEncoder {
    */
   encode(input: Uint8Array): string;
 }
-
-/**
- * A base58 (Bitcoin) encoder.
- *
- * @category Encoding
- */
-export const Base58: BaseEncoder = base(
-  '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',
-);
 
 /**
  * A base64 encoder.
@@ -60,9 +49,8 @@ export const Base64: BaseEncoder = {
  * @param string A string.
  * @returns A `Uint8Array`.
  */
-export function stringToBytes(string: string) {
-  return new Uint8Array(Array.from(string, (_, k) => string.charCodeAt(k)));
-}
+export const stringToBytes = (string: string) =>
+  new Uint8Array(Array.from(string, (_, k) => string.charCodeAt(k)));
 
 /**
  * Encode individual bytes to string by char code.
@@ -80,23 +68,30 @@ export function bytesToString(bytes: ArrayLike<number> | ArrayBufferLike) {
 }
 
 /**
- * Coerces an identifier-like value to a `Uint8Array`.
- *
- * @category Encoding
- * @param input An array of byte values, `ArrayBufferLike`, or base58 encoded string.
- * @returns A `Uint8Array`.
- */
-export function identifierToBytes(input: ArrayLike<number> | ArrayBufferLike | string) {
-  return typeof input === 'string' ? Base58.decode(input) : new Uint8Array(input);
-}
-
-/**
  * Coerces a payload-like value to a `Uint8Array`.
  *
  * @category Encoding
  * @param input An array of byte values, `ArrayBufferLike`, or base64 encoded string.
  * @returns A `Uint8Array`.
  */
-export function payloadToBytes(input: ArrayLike<number> | ArrayBufferLike | string) {
-  return typeof input === 'string' ? Base64.decode(input) : new Uint8Array(input);
+export const payloadToBytes = (input: ArrayLike<number> | ArrayBufferLike | string) =>
+  typeof input === 'string' ? Base64.decode(input) : new Uint8Array(input);
+
+/**
+ * Compares two byte arrays.
+ *
+ * @returns `true` if they match, `false` if not.
+ */
+export function compareBytes(a: Uint8Array, b: Uint8Array) {
+  if (a.byteLength !== b.byteLength) {
+    return false;
+  }
+
+  for (let i = 0; i < a.byteLength; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+
+  return true;
 }

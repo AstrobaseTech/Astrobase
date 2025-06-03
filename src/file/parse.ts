@@ -1,20 +1,24 @@
-import { File } from '../file/file.js';
-import type { ContentIdentifierSchemeParser } from '../identifiers/identifiers.js';
+import type { ContentIdentifierSchemeParser } from '../cid/cid.js';
+import { FileBuilder } from './file-builder.js';
 
 /**
- * A parse handler for {@linkcode ContentIdentifierSchemeParser}s, such as `Immutable` and `Mutable`,
- * that deal with {@linkcode File}s.
+ * Used to parse and validate content as files by the `Immutable` and `Mutable` content identifier
+ * schemes.
  *
  * @param _ The content identifier (unused).
  * @param content The content buffer.
  * @param instanceID The instance for codec resolution.
- * @returns The parsed {@linkcode File}.
+ * @returns The parsed file as a {@link FileBuilder} object.
  * @throws If the parsing and handoff to the middleware and codec systems fail, that error is
  *   thrown.
  * @internal
  */
-export const parse: ContentIdentifierSchemeParser<File> = async (_, content, instanceID) => {
-  const file = new File(content);
+export const parseAsFile: ContentIdentifierSchemeParser<FileBuilder> = async (
+  _,
+  content,
+  instanceID,
+) => {
+  const file = new FileBuilder(content);
   await file.getValue(instanceID); // validate
   return file;
 };

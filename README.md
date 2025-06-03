@@ -11,12 +11,14 @@ An extensible protocol suite for building multi-user apps with native privacy, s
 ## Installation
 
 ```sh
-npm i @astrobase/core
+npm i @astrobase/sdk
 ```
 
 ## Stability
 
 This project is currently in a pre-release state as indicated by the `<1.0.0` version number. During this time, breaking changes will be more common.
+
+- Modules tagged with `@experimental` in the documentation are susceptible to breaking changes and even full rewrites between versions.
 
 - Breaking changes will occur on **minor** version numbers, i.e. the `x` of `v0.x.y`, where possible.
 

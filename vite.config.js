@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     coverage: {
       include: ['src/**'],
-      exclude: ['docs/**', '**/index.[jt]s', 'src/core.ts', ...coverageConfigDefaults.exclude],
+      exclude: ['docs/**', '**/index.[jt]s', ...coverageConfigDefaults.exclude],
     },
   },
 });

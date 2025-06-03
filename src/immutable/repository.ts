@@ -1,64 +1,61 @@
-import { File } from '../file/file.js';
-import { hash, HashAlgorithm, hashToBytes, type HashLike } from '../hashes/index.js';
-import { ContentIdentifier } from '../identifiers/identifiers.js';
-import {
-  deleteContent,
-  getContent,
-  putContent,
-  type PutOptions,
-} from '../repository/repository.js';
+import { ContentIdentifier } from '../cid/cid.js';
+// prettier-ignore
+import { deleteContent, getContent, putContent, type PutOptions } from '../content/api.js';
+import { FileBuilder } from '../file/file-builder.js';
+import { hash, hashToBytes, SHA_256, type HashLike } from '../hashing/index.js';
+import type { Instance } from '../instance/instance.js';
+
+/** The content identifier prefix for the immutable content scheme. */
+export const IMMUTABLE_PREFIX = '$ref';
 
 /**
- * Coerces a {@linkcode HashLike} value into a {@linkcode ContentIdentifier} instance for the
- * immutable scheme.
- *
- * @param hash The {@linkcode HashLike} value.
- * @returns The {@linkcode ContentIdentifier} instance.
+ * Coerces an immutable content hash into a {@link ContentIdentifier} for the immutable content
+ * scheme.
  */
-export const toImmutableCID = (hash: HashLike) => new ContentIdentifier([1, ...hashToBytes(hash)]);
+export const toImmutableCID = (hash: HashLike) =>
+  new ContentIdentifier(IMMUTABLE_PREFIX, hashToBytes(hash));
 
 /**
- * Sends a request, to all registered channels asynchronously, to delete an item of immutable
- * content.
+ * Asynchronously requests each client of the instance to delete an item of immutable content by its
+ * content hash.
  *
- * @param hash A valid {@linkcode HashLike} of the {@linkcode File} to delete.
- * @param instanceID The instance to delete from.
- * @returns A promise that resolves when all requests have completed.
+ * @param instance The instance to request a delete.
+ * @param hash A valid {@link HashLike} of the File to delete.
+ * @returns A promise that resolves when all requests have settled.
  */
-export function deleteImmutable(hash: HashLike, instanceID?: string) {
-  return deleteContent(toImmutableCID(hash), instanceID);
-}
+export const deleteImmutable = (instance: Instance, hash: HashLike) =>
+  deleteContent(toImmutableCID(hash), instance);
 
 /**
- * Queries registered channels to retrieve an immutable {@linkcode File}. If all channels are queried
- * with no successful result, returns `void`.
+ * Queries clients of the instance to retrieve an immutable File by its content hash. This function
+ * extends {@link getContent}.
  *
- * @template T The type of the {@linkcode File} content after successful decoding.
- * @param hash A valid {@linkcode HashLike} of the {@linkcode File} to retrieve.
- * @param instanceID The instance to retrieve from.
- * @returns A promise that resolves with the decoded content, or `void` if nothing valid was
+ * @template T The type of the File content after successful decoding.
+ * @param instance The instance to query.
+ * @param hash The hash of the desired File.
+ * @returns A promise that resolves with the File if successful or `void` if nothing valid was
  *   retrieved.
  */
-export function getImmutable<T>(hash: HashLike, instanceID?: string) {
-  return getContent<File<T>>(toImmutableCID(hash), instanceID);
-}
+export const getImmutable = <T>(instance: Instance, hash: HashLike) =>
+  getContent<FileBuilder<T>>(toImmutableCID(hash), instance);
 
-/** Additional options for `putImmutable`. */
+/** Additional options for {@link putImmutable}. */
 export interface ImmutablePutOptions extends PutOptions {
   /** The hashing algorithm to use. */
-  hashAlg?: HashAlgorithm;
+  hashAlg?: number;
 }
 
 /**
- * Sends a request, to all registered channels asynchronously, to save an item of immutable content.
+ * Asynchronously pushes an immutable File to each client of the instance. This function extends
+ * {@link putContent} and handles content hash generation.
  *
- * @param file A {@linkcode File} instance to save.
- * @param options Additional {@linkcode ImmutablePutOptions}.
- * @returns A promise that resolves with the {@linkcode ContentIdentifier}.
+ * @param file The file to push.
+ * @param options The put request options.
+ * @returns A promise that resolves with the Content Identifier after all requests have settled.
  */
-export async function putImmutable(file: File, options?: ImmutablePutOptions) {
-  const hashAlg = options?.hashAlg ?? HashAlgorithm.SHA256;
-  const cid = toImmutableCID(await hash(hashAlg, file.buffer));
+export async function putImmutable(file: FileBuilder, options: ImmutablePutOptions) {
+  const hashAlg = options.hashAlg ?? SHA_256;
+  const cid = toImmutableCID(await hash(options.instance, hashAlg, file.buffer));
   await putContent(cid, file.buffer, options);
   return cid;
 }

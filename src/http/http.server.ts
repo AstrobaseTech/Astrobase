@@ -1,17 +1,18 @@
-/** @module HTTP/Server */
+/**
+ * @module HTTP/Server
+ * @category API Reference
+ * @experimental
+ */
 
 import { createServer, ServerResponse } from 'http';
-import { decodeWithCodec, encodeWithCodec } from '../codec/codecs.js';
-import { processRequest } from '../rpc/server.js';
+import { decodeWithCodec, encodeWithCodec } from '../codecs/codecs.js';
+import type { Instance } from '../instance/instance.js';
+import { processRequest } from '../rpc/server/server.js';
 
 /** A HTTP server configuration. */
 export interface HttpServerConfig {
-  /**
-   * Instance to use for codec & procedure handler resolution.
-   *
-   * @default undefined
-   */
-  instanceID?: string;
+  /** Instance to use for codec & procedure handler resolution. */
+  instance: Instance;
 
   /**
    * API path prefix for requests.
@@ -31,11 +32,11 @@ export interface HttpServerConfig {
 /**
  * Spins up a HTTP server.
  *
- * @param config {@linkcode HttpServerConfig}
+ * @param config {@link HttpServerConfig}
  */
-export function serve(config?: HttpServerConfig) {
-  const prefix = config?.prefix ?? '/astrobase/';
-  const port = config?.port ?? 3000;
+export function serve(config: HttpServerConfig) {
+  const prefix = config.prefix ?? '/astrobase/';
+  const port = config.port ?? 3000;
 
   return createServer((req, res) => {
     const procedure = req.url!.split(prefix)[1];
@@ -50,31 +51,25 @@ export function serve(config?: HttpServerConfig) {
       req.on('end', async () => {
         try {
           const payload = await decodeWithCodec(
+            config.instance,
             new TextEncoder().encode(data),
             req.headers['content-type']!,
-            config?.instanceID,
           );
 
           try {
-            const result = await processRequest({
-              instanceID: config?.instanceID,
+            const result = await processRequest(config.instance, {
               jobID: 0,
               payload,
               procedure,
             });
-            const resMsg = await encodeWithCodec(result, 'application/json', config?.instanceID);
+            const resMsg = await encodeWithCodec(config.instance, result, 'application/json');
             res.writeHead(200, { 'content-type': 'application/json' }).end(resMsg);
           } catch (e) {
-            // TODO: appropriate response for unsupported procedures, or procedure threw an error
             res.writeHead(500, { 'content-type': 'text/plain' }).end('Unable to process request');
             // eslint-disable-next-line no-console
             console.error(e);
-            return;
           }
-
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (e) {
-          // TODO: appropriate response for unsupported content type
+        } catch {
           res.writeHead(400, { 'content-type': 'text/plain' }).end('Invalid request body');
         }
       });

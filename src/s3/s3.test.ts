@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { S3Client } from '@aws-sdk/client-s3';
 import { describe } from 'vitest';
 import { testRPCStrategyForContent } from '../../testing/rpc-strategy.js';

@@ -1,7 +1,14 @@
-/** @module IndexedDB */
+/**
+ * Implements a client for the IndexedDB web API that supports content procedures, enabling content
+ * storage & retrieval via an IndexedDB database table.
+ *
+ * @module IndexedDB
+ * @category API Reference
+ * @experimental
+ */
 
-import type { RPCClientStrategy } from '../rpc/client/types.js';
-import type { PutRequestPayload } from '../rpc/shared/index.js';
+import type { ContentProcedures } from '../content/procedures.js';
+import type { ClientStrategy } from '../rpc/client/client-strategy.js';
 
 /** Configuration object for the IndexedDB channel driver. */
 export interface IndexedDBConfig {
@@ -22,10 +29,12 @@ export interface IndexedDBConfig {
 /**
  * Creates an RPC client strategy for IndexedDB to handle content procedures.
  *
- * @param config An optional {@linkcode IndexedDBConfig} object to configure aspects of the strategy.
+ * @param config An optional {@link IndexedDBConfig} object to configure aspects of the strategy.
  * @returns An RPC client strategy for IndexedDB.
  */
-export async function indexeddb(config?: IndexedDBConfig): Promise<RPCClientStrategy> {
+export async function indexeddb(
+  config?: IndexedDBConfig,
+): Promise<ClientStrategy<ContentProcedures>> {
   const database = config?.database ?? 'astrobase';
   const table = config?.table ?? 'astrobase';
   const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -37,31 +46,32 @@ export async function indexeddb(config?: IndexedDBConfig): Promise<RPCClientStra
     };
   });
   return {
-    procedures: {
-      'content:delete': (cid) =>
-        new Promise((resolve, reject) => {
-          const request = db.transaction(table, 'readwrite').objectStore(table).delete(cid.bytes);
-          request.onerror = () => reject(request.error!);
-          request.onsuccess = () => resolve();
-        }),
+    'content:delete': (cid) =>
+      new Promise((resolve, reject) => {
+        const request = db
+          .transaction(table, 'readwrite')
+          .objectStore(table)
+          .delete(cid.toString());
+        request.onerror = () => reject(request.error!);
+        request.onsuccess = () => resolve();
+      }),
 
-      'content:get': (cid) =>
-        new Promise((resolve, reject) => {
-          const request = db.transaction(table, 'readonly').objectStore(table).get(cid.bytes);
-          request.onerror = () => reject(request.error!);
-          request.onsuccess = () =>
-            resolve((request.result as { content: ArrayBuffer } | undefined)?.content);
-        }),
+    'content:get': (cid) =>
+      new Promise((resolve, reject) => {
+        const request = db.transaction(table, 'readonly').objectStore(table).get(cid.toString());
+        request.onerror = () => reject(request.error!);
+        request.onsuccess = () =>
+          resolve((request.result as { content: ArrayBuffer } | undefined)?.content);
+      }),
 
-      'content:put': ({ cid, content }: PutRequestPayload) =>
-        new Promise((resolve, reject) => {
-          const request = db
-            .transaction(table, 'readwrite')
-            .objectStore(table)
-            .put({ cid: cid.bytes, content });
-          request.onerror = () => reject(request.error!);
-          request.onsuccess = () => resolve();
-        }),
-    },
+    'content:put': ({ cid, content }) =>
+      new Promise((resolve, reject) => {
+        const request = db
+          .transaction(table, 'readwrite')
+          .objectStore(table)
+          .put({ cid: cid.toString(), content });
+        request.onerror = () => reject(request.error!);
+        request.onsuccess = () => resolve();
+      }),
   };
 }

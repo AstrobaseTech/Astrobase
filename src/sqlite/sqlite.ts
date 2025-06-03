@@ -1,11 +1,19 @@
 /**
- * Adds support for using a SQLite database for content storage and retrieval.
+ * Implements a client for SQLite that supports content procedures, enabling content storage &
+ * retrieval via a SQLite database.
+ *
+ * Requires `better-sqlite3`:
+ *
+ *     npm i better-sqlite3
  *
  * @module SQLite
+ * @category API Reference
+ * @experimental
  */
 
 import SQLite from 'better-sqlite3';
-import type { RPCClientStrategy } from '../rpc/client/types.js';
+import type { ContentProcedures } from '../content/procedures.js';
+import type { ClientStrategy } from '../rpc/client/client-strategy.js';
 
 /**
  * Configuration options for SQLite. Please refer to [`better-sqlite3` API
@@ -21,14 +29,14 @@ export interface SQLiteClientConfig extends SQLite.Options {
 }
 
 /**
- * Creates an {@linkcode RPCClientStrategy} for SQLite3.
+ * Creates a {@link ClientStrategy} for SQLite3.
  *
  * This is implemented using [`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3) - a peer
  * dependency. You'll need to install it for your app:
  *
  *     npm i better-sqlite3
  */
-export default function (config: SQLiteClientConfig = {}): RPCClientStrategy {
+export default function (config: SQLiteClientConfig = {}): ClientStrategy<ContentProcedures> {
   const { filename, ...options } = config;
 
   const sql = new SQLite(filename, options);
@@ -42,32 +50,30 @@ export default function (config: SQLiteClientConfig = {}): RPCClientStrategy {
   sql
     .prepare(
       `CREATE TABLE IF NOT EXISTS astrobase (
-        cid BLOB PRIMARY KEY,
+        cid TEXT PRIMARY KEY,
         content BLOB NOT NULL
       ) WITHOUT ROWID`,
     )
     .run();
 
   return {
-    procedures: {
-      'content:delete'(cid) {
-        sql.prepare<Uint8Array>('DELETE FROM astrobase WHERE cid = ?').run(cid.bytes);
-      },
+    'content:delete'(cid) {
+      sql.prepare<string>('DELETE FROM astrobase WHERE cid = ?').run(cid.toString());
+    },
 
-      'content:get': (cid) => {
-        const result = sql
-          .prepare<Uint8Array, { content: Buffer }>('SELECT content FROM astrobase WHERE cid = ?')
-          .get(cid.bytes)?.content;
-        return result ? new Uint8Array(result) : undefined;
-      },
+    'content:get'(cid) {
+      const result = sql
+        .prepare<string, { content: Buffer }>('SELECT content FROM astrobase WHERE cid = ?')
+        .get(cid.toString())?.content;
+      return result ? new Uint8Array(result) : undefined;
+    },
 
-      'content:put': ({ cid, content }) => {
-        sql
-          .prepare<
-            [Uint8Array, Uint8Array]
-          >('INSERT OR REPLACE INTO astrobase (cid, content) VALUES (?, ?)')
-          .run(cid.bytes, content);
-      },
+    'content:put'({ cid, content }) {
+      sql
+        .prepare<
+          [string, Uint8Array]
+        >('INSERT OR REPLACE INTO astrobase (cid, content) VALUES (?, ?)')
+        .run(cid.toString(), content);
     },
   };
 }

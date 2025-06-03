@@ -1,116 +1,115 @@
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import { File } from '../file/file.js';
-import { hash, Hash, HashAlgorithm } from '../hashes/index.js';
-import { ContentIdentifier } from '../identifiers/identifiers.js';
-import { clients, type RPCClientConfig } from '../rpc/client/index.js';
-import type { ContentProcedures } from '../rpc/shared/index.js';
+import { describe, expect, test, vi } from 'vitest';
+import { ContentIdentifier } from '../cid/cid.js';
+import { Common } from '../common/common.js';
+import type { ContentProcedures } from '../content/procedures.js';
+import { FileBuilder } from '../file/file-builder.js';
+import { hash, Hash, SHA_256 } from '../hashing/index.js';
+import { createInstance } from '../instance/instance.js';
+import type { ClientConfig } from '../rpc/client/client-set.js';
 import { deleteImmutable, getImmutable, putImmutable, toImmutableCID } from './repository.js';
 
-const instanceID = 'Immutable';
-
-describe(instanceID, () => {
+describe('Immutable Scheme API', () => {
   describe('Delete', () => {
-    const deleteHandler = vi.fn();
-    const client: RPCClientConfig<Pick<ContentProcedures, 'content:delete'>> = {
-      instanceID,
-      strategy: { procedures: { 'content:delete': deleteHandler } },
-    };
+    const testHandler = vi.fn();
 
-    beforeAll(() => clients.add(client));
-    afterAll(() => clients.delete(client));
+    const testInstance = createInstance(Common, {
+      clients: [{ strategy: { 'content:delete': testHandler } }],
+    });
 
-    const hash = new Hash([HashAlgorithm.SHA256, ...crypto.getRandomValues(new Uint8Array(32))]);
+    const hash = new Hash([SHA_256, ...crypto.getRandomValues(new Uint8Array(32))]);
     const cid = toImmutableCID(hash);
 
     (
       [
         ['array', [...hash.bytes]],
-        ['base58 string', hash.toBase58()],
         ['Hash', hash],
         ['Uint8Array', hash.bytes],
       ] as const
     ).forEach(([name, cidLike], i) =>
       test(`With ${name}`, async () => {
-        await expect(deleteImmutable(cidLike, instanceID)).resolves.toBeUndefined();
-        expect(deleteHandler).toBeCalledTimes(i + 1);
-        expect(deleteHandler).lastCalledWith(cid, instanceID);
+        await expect(deleteImmutable(testInstance, cidLike)).resolves.toBeUndefined();
+        expect(testHandler).toBeCalledTimes(i + 1);
+        expect(testHandler).lastCalledWith(cid, testInstance);
       }),
     );
   });
 
   describe('Get', async () => {
-    const file = await new File().setMediaType('application/json').setValue({ test: 'test' });
-    const fileHash = await hash(HashAlgorithm.SHA256, file.buffer);
-    const fileCID = toImmutableCID(fileHash);
-
-    const invalidCIDs = [
-      crypto.getRandomValues(new Uint8Array(33)),
-      [HashAlgorithm.SHA256, ...crypto.getRandomValues(new Uint8Array(32))],
-    ].map((arr) => toImmutableCID(arr));
-
-    const getHandler = vi.fn((inputCID: ContentIdentifier) => {
+    const testHandler = vi.fn((inputCID: ContentIdentifier) => {
       for (const knownCID of [fileCID, ...invalidCIDs]) {
-        if (inputCID.toBase58() === knownCID.toBase58()) {
+        if (inputCID.toString() === knownCID.toString()) {
           return Promise.resolve(file.buffer);
         }
       }
       return Promise.resolve();
     });
 
-    const client: RPCClientConfig<Pick<ContentProcedures, 'content:get'>> = {
-      instanceID,
-      strategy: { procedures: { 'content:get': getHandler } },
+    const testClient: ClientConfig<Pick<ContentProcedures, 'content:get'>> = {
+      strategy: {
+        'content:get': testHandler,
+      },
     };
 
-    beforeAll(() => clients.add(client));
-    afterAll(() => clients.delete(client));
+    const testInstance = createInstance(Common, { clients: [testClient] });
+
+    const file = await new FileBuilder()
+      .setMediaType('application/json')
+      .setValue({ test: 'test' }, testInstance);
+
+    const fileHash = await hash(testInstance, SHA_256, file.buffer);
+
+    const fileCID = toImmutableCID(fileHash);
+
+    const invalidCIDs = [
+      crypto.getRandomValues(new Uint8Array(33)),
+      [SHA_256, ...crypto.getRandomValues(new Uint8Array(32))],
+    ].map((arr) => toImmutableCID(arr));
 
     let i = 0;
 
     test('Found and valid', async () => {
-      await expect(getImmutable<unknown>(fileHash, instanceID)).resolves.toEqual(file);
-      expect(getHandler).toBeCalledTimes(++i);
-      expect(getHandler).lastCalledWith(fileCID, instanceID);
-      expect(getHandler).lastReturnedWith(Promise.resolve(file.buffer));
+      await expect(getImmutable<unknown>(testInstance, fileHash)).resolves.toEqual(file);
+      expect(testHandler).toBeCalledTimes(++i);
+      expect(testHandler).lastCalledWith(fileCID, testInstance);
+      expect(testHandler).lastReturnedWith(Promise.resolve(file.buffer));
     });
 
     test('Found but invalid', async () => {
       for (const cid of invalidCIDs) {
-        await expect(getImmutable<unknown>(cid.rawValue, instanceID)).resolves.toBeUndefined();
-        expect(getHandler).toBeCalledTimes(++i);
-        expect(getHandler).lastCalledWith(cid, instanceID);
-        expect(getHandler).lastReturnedWith(Promise.resolve(file.buffer));
+        await expect(getImmutable<unknown>(testInstance, cid.value)).resolves.toBeUndefined();
+        expect(testHandler).toBeCalledTimes(++i);
+        expect(testHandler).lastCalledWith(cid, testInstance);
+        expect(testHandler).lastReturnedWith(Promise.resolve(file.buffer));
       }
     });
 
     test('Not found', async () => {
-      const cid = toImmutableCID([
-        HashAlgorithm.SHA256,
-        ...crypto.getRandomValues(new Uint8Array(32)),
-      ]);
-      await expect(getImmutable<unknown>(cid.rawValue, instanceID)).resolves.toBeUndefined();
-      expect(getHandler).toBeCalledTimes(++i);
-      expect(getHandler).lastCalledWith(cid, instanceID);
-      expect(getHandler).lastReturnedWith(Promise.resolve());
+      const cid = toImmutableCID([SHA_256, ...crypto.getRandomValues(new Uint8Array(32))]);
+      await expect(getImmutable<unknown>(testInstance, cid.value)).resolves.toBeUndefined();
+      expect(testHandler).toBeCalledTimes(++i);
+      expect(testHandler).lastCalledWith(cid, testInstance);
+      expect(testHandler).lastReturnedWith(Promise.resolve());
     });
   });
 
-  describe('Put', () => {
-    const putHandler = vi.fn();
-    const client: RPCClientConfig<Pick<ContentProcedures, 'content:put'>> = {
-      instanceID,
-      strategy: { procedures: { 'content:put': putHandler } },
-    };
+  test('Put', async () => {
+    const testHandler = vi.fn();
 
-    beforeAll(() => clients.add(client));
-    afterAll(() => clients.delete(client));
-
-    test('With File', async () => {
-      const file = await new File().setMediaType('application/json').setValue({ test: 'test' });
-      const cid = await putImmutable(file, { instanceID });
-      expect(cid).toBeInstanceOf(ContentIdentifier);
-      expect(putHandler).toBeCalledTimes(1);
-      expect(putHandler).lastCalledWith({ cid, content: file.buffer }, instanceID);
+    const testInstance = createInstance(Common, {
+      clients: [{ strategy: { 'content:put': testHandler } }],
     });
+
+    const file = await new FileBuilder()
+      .setMediaType('application/json')
+      .setValue({ test: 'test' }, testInstance);
+
+    const cid = await putImmutable(file, { instance: testInstance });
+
+    expect(cid).toBeInstanceOf(ContentIdentifier);
+
+    expect(testHandler).toHaveBeenCalledExactlyOnceWith(
+      { cid, content: file.buffer },
+      testInstance,
+    );
   });
 });

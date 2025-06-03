@@ -1,48 +1,46 @@
-import { getMiddlewares } from './registry.js';
+import type { Instance } from '../instance/instance.js';
 import type { Middleware } from './types.js';
 
 /**
  * Perform a recursive replace on a value using the middlewares provided or pre-registered.
  *
- * @param data The data to recursively walk and replace.
- * @param middlewares An optional array of middlewares to use. If omitted then registered
- *   middlewares are used.
- * @param instanceID The instance for middleware resolution. Also provided to the middleware as
+ * @param instance The instance for middleware resolution. Also provided to the middleware as
  *   context.
+ * @param data The data to recursively walk and replace.
+ * @param middlewares An optional array of additional middlewares to use.
  * @returns A promise that resolves with the post-processed value.
  */
-export const replace = (data: unknown, middlewares?: Middleware[], instanceID = '') =>
-  initSwap('replacer', data, instanceID, middlewares);
+export const replace = (instance: Instance, data: unknown, middlewares?: Middleware[]) =>
+  initSwap('replacer', data, instance, middlewares);
 
 /**
  * Perform a recursive revive on a value using the middlewares provided or pre-registered.
  *
- * @param data The data to recursively walk and revive.
- * @param middlewares An optional array of middlewares to use. If omitted then registered
- *   middlewares are used.
- * @param instanceID The instance for middleware resolution. Also provided to the middleware as
+ * @param instance The instance for middleware resolution. Also provided to the middleware as
  *   context.
+ * @param data The data to recursively walk and revive.
+ * @param middlewares An optional array of additional middlewares to use.
  * @returns A promise that resolves with the post-processed value.
  */
-export const revive = (data: unknown, middlewares?: Middleware[], instanceID = '') =>
-  initSwap('reviver', data, instanceID, middlewares);
+export const revive = (instance: Instance, data: unknown, middlewares?: Middleware[]) =>
+  initSwap('reviver', data, instance, middlewares);
 
-/** Begin recursive {@linkcode swap} for value root. */
+/** Begin recursive {@link swap} for value root. */
 function initSwap(
   fn: keyof Middleware,
   data: unknown,
-  instanceID = '',
-  middlewares = getMiddlewares(instanceID),
+  instance: Instance,
+  middlewares = instance.middlewares,
 ) {
   const refTrack = new Set();
-  return swap(middlewares, fn, instanceID, refTrack, data);
+  return swap(middlewares, fn, instance, refTrack, data);
 }
 
 /** Recursive swap, walking object and array values. */
 async function swap(
   middlewares: Middleware[],
   fn: keyof Middleware,
-  instanceID: string,
+  instance: Instance,
   refTrack: Set<unknown>,
   value: unknown,
   key?: string | number,
@@ -62,7 +60,7 @@ async function swap(
 
       // Execute middleware
       for (const middleware of middlewares) {
-        value = await Promise.resolve(middleware[fn](key, value, { instanceID }));
+        value = await Promise.resolve(middleware[fn](key, value, instance));
       }
 
       // Recurse on arrays and simple objects
@@ -74,7 +72,7 @@ async function swap(
         if (value instanceof Array) {
           refTrack.add(value);
           value = await Promise.all(
-            value.map((entry, index) => swap(middlewares, fn, instanceID, refTrack, entry, index)),
+            value.map((entry, index) => swap(middlewares, fn, instance, refTrack, entry, index)),
           );
         } else if (Object.getPrototypeOf(value) === Object.prototype) {
           refTrack.add(value);
@@ -84,7 +82,7 @@ async function swap(
             (value as Record<string, unknown>)[key] = await swap(
               middlewares,
               fn,
-              instanceID,
+              instance,
               refTrack,
               (oldObj as Record<string, unknown>)[key],
               key,
