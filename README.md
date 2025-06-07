@@ -2,7 +2,7 @@
 
 # [Astrobase JS SDK](https://astrobase.me/docs/)
 
-An extensible protocol suite for building multi-user apps with native privacy, security, and self-sovereignty.
+An extensible protocol suite for building multi-user apps with native privacy, security, and self-autonomy.
 
 [Website](https://astrobase.me) • [Docs](https://astrobase.me/docs/)
 
