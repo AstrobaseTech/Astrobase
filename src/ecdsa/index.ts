@@ -1,10 +1,4 @@
-/**
- * Implements ECDSA signatures using the Keyring.
- *
- * @module ECDSA
- * @category API Reference
- * @experimental
- */
+/** @module ECDSA */
 
 export * from './ecdsa.js';
 export * from './wrap.js';

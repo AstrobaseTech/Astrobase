@@ -1,11 +1,4 @@
-/**
- * Implements a client for the IndexedDB web API that supports content procedures, enabling content
- * storage & retrieval via an IndexedDB database table.
- *
- * @module IndexedDB
- * @category API Reference
- * @experimental
- */
+/** @module IndexedDB */
 
 import type { ContentProcedures } from '../content/procedures.js';
 import type { ClientStrategy } from '../rpc/client/client-strategy.js';

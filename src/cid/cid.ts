@@ -1,14 +1,4 @@
-/**
- * Content Identifiers are keys used to identify and look up content. A Content Identifier is made
- * up of a prefix and a value. The prefix is a short human readable string which indicates what type
- * of Content Identifier it is and therefore what rules the content should follow. The value varies
- * depending on the type of Content Identifier. Content Identifiers use bech32 encoding to represent
- * them as a string.
- *
- * @module CID
- * @category API Reference
- * @experimental
- */
+/** @module CID */
 
 import { bech32m } from 'bech32';
 import type { Instance } from '../instance/instance.js';

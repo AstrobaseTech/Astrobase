@@ -4,7 +4,7 @@
 
 An extensible protocol suite for building multi-user apps with native privacy, security, and self-autonomy.
 
-[Website](https://astrobase.me) • [Docs](https://astrobase.me/docs/)
+[Website](https://astrobase.me) • [Docs](https://astrobase.me/sdk/docs/)
 
 </div>
 

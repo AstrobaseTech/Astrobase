@@ -1,8 +1,4 @@
-/**
- * @module In-Memory
- * @category API Reference
- * @experimental
- */
+/** @module In-Memory */
 
 import type { ContentProcedures } from '../content/procedures.js';
 import type { ClientStrategy } from '../rpc/client/client-strategy.js';

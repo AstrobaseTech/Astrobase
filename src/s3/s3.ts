@@ -1,15 +1,4 @@
-/**
- * Implements a client for S3-compatible APIs that supports content procedures, enabling content
- * storage & retrieval via an S3-compatible API.
- *
- * Requires `@aws-sdk/client-s3`:
- *
- *     npm i @aws-sdk/client-s3
- *
- * @module S3
- * @category API Reference
- * @experimental
- */
+/** @module S3 */
 
 // prettier-ignore
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, type S3Client } from '@aws-sdk/client-s3';

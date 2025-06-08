@@ -35,19 +35,8 @@
     "./src/varint/varint.ts",
     "./src/wraps/index.ts"
   ],
-  "hideGenerator": true,
   "includeVersion": true,
-  "name": "Astrobase JS SDK",
-  "navigation": {
-    "includeCategories": true,
-    "includeFolders": false,
-    "includeGroups": false
-  },
-  "navigationLinks": {
-    "Website": "/",
-    "GitHub": "https://github.com/AstrobaseTech/Astrobase"
-  },
-  "out": "docs",
-  "sort": ["instance-first", "alphabetical"],
+  "name": "Astrobase SDK",
+  "out": "docs/api",
   "sourceLinkExternal": true
 }

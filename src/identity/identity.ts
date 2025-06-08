@@ -1,16 +1,5 @@
 /**
- * Implements the identity content identifier scheme.
- *
- * With this scheme, a public key from an asymmetric key pair is embedded in the content identifier.
- * The content itself includes a content identifier reference and must be a valid signature
- * verifiable with the public key in the content identifier. This way, only the private key holder
- * can mutate the reference.
- *
- * Identities are derived from the active keyring using BIP32 - so each keyring can generate many
- * identities.
- *
  * @module Identity
- * @category API Reference
  * @experimental
  */
 

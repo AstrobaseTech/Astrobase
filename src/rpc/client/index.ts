@@ -1,6 +1,5 @@
 /**
  * @module RPC/Client
- * @category API Reference
  * @experimental
  */
 

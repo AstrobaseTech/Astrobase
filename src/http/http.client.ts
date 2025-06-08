@@ -1,6 +1,6 @@
 /**
  * @module HTTP/Client
- * @category API Reference
+ *
  * @experimental
  */
 

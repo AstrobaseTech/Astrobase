@@ -1,8 +1,5 @@
 /**
- * Keyring management API.
- *
  * @module Keyrings
- * @category API Reference
  * @experimental
  */
 

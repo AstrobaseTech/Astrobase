@@ -1,30 +1,10 @@
-/**
- * Implements a class to parse a Protobuf style varint within binary.
- *
- * @module Varint
- * @category API Reference
- * @example
- *
- * ```js
- * import { Varint } from '@astrobase/sdk/varint';
- *
- * const bytes = new Uint8Array([233, 15]);
- * const offset = 0;
- *
- * const varint = new Varint(bytes, offset);
- *
- * console.log(varint.value); // 2025
- * ```
- *
- * @experimental
- */
+/** @module Varint */
 
 import v from 'varint';
 
 /**
  * Parses a Protobuf style varint within binary.
  *
- * @ignore
  * @example
  *
  * ```js

@@ -1,20 +1,4 @@
-/**
- * Implements a Codec for JSON that uses `BinaryMiddleware` to support byte arrays.
- *
- * @module Codecs / JSON
- * @category API Reference
- * @example
- *
- * ```js
- * import JsonCodec from '@astrobase/sdk/codec/json';
- * import { JSON } from '@astrobase/sdk/codecs';
- * import createInstance from '@astrobase/sdk/instance';
- *
- * const customInstance = createInstance({ codecs: { [JSON]: JsonCodec } });
- * ```
- *
- * @experimental
- */
+/** @module Codecs/JSON */
 
 import { BinaryMiddleware } from '../../middleware/binary.js';
 import type { Codec } from '../codecs.js';
@@ -22,7 +6,6 @@ import type { Codec } from '../codecs.js';
 /**
  * A {@link Codec} for JSON that uses {@link BinaryMiddleware} to support byte arrays.
  *
- * @ignore
  * @example
  *
  * ```js

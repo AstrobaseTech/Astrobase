@@ -1,11 +1,4 @@
-/**
- * Provides a BIP39 implementation for keyring mnemonics. Requires a SHA-256 implementation provided
- * in the instance to derive checksums.
- *
- * @module BIP39
- * @category API Reference
- * @experimental
- */
+/** @module BIP39 */
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 

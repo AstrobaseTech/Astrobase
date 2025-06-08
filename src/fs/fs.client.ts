@@ -1,10 +1,4 @@
-/**
- * Adds support for using the native filesystem for content storage and retrieval.
- *
- * @module FS
- * @category API Reference
- * @experimental
- */
+/** @module FS */
 
 import { access, constants, readFile, rm, stat, writeFile } from 'fs/promises';
 import { join, resolve } from 'path';

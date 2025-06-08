@@ -1,26 +1,4 @@
-/**
- * Implements a base `InstanceConfig` that provides implementations for all supported codecs,
- * procedure handlers, hash algorithms, content identifier schemes, and wrap types.
- *
- * This design enables a "batteries included" experience with minimal configuration, while also
- * allowing unparalleled tree-shakability and customisation. Most applications will use the common
- * config as a base, and may use additional configs to extend or even override features. In special
- * cases the config can not be imported into the application at all, and instead a custom config can
- * load only the functionality needed, leaving base functionality to be tree-shaken.
- *
- * @module Common
- * @category API Reference
- * @example
- *
- * ```js
- * import { Common } from '@astrobase/sdk/common';
- * import { createInstance } from '@astrobase/sdk/instance';
- *
- * const instance = createInstance(Common);
- * ```
- *
- * @experimental
- */
+/** @module Common */
 
 import { BinaryCodec } from '../codecs/binary/binary.js';
 import { JsonCodec } from '../codecs/json/json.js';
@@ -49,7 +27,6 @@ import { WrapCodec } from '../wraps/codec.js';
  * configuration to load only the functionality needed and leaving base functionality to be
  * tree-shaken.
  *
- * @ignore
  * @example
  *
  *     import { Common } from '@astrobase/sdk/common';

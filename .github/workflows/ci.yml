@@ -6,6 +6,9 @@ concurrency:
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   CI:
     runs-on: ubuntu-latest

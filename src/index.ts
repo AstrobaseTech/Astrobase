@@ -1,5 +1,3 @@
-/** Support for package.json `main` entrypoint for backwards compatibility. */
-
 export * from './ascii/ascii.js';
 export * from './bip39/bip39.js';
 

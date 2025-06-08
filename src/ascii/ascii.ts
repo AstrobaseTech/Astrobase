@@ -1,28 +1,8 @@
-/**
- * Implements a class to parse a NUL terminated ASCII string within binary.
- *
- * @module ASCII
- * @category API Reference
- * @example
- *
- * ```js
- * import { Ascii } from '@astrobase/sdk/ascii';
- *
- * const bytes = new Uint8Array([72, 101, 108, 108, 111, 0]);
- * const offset = 0;
- *
- * const ascii = new Ascii(bytes, offset);
- *
- * console.log(ascii.value); // 'Hello'
- * ```
- *
- * @experimental
- */
+/** @module ASCII */
 
 /**
  * Parses a NUL terminated ASCII string within binary.
  *
- * @ignore
  * @example
  *
  * ```js
@@ -34,17 +14,23 @@
  * const ascii = new Ascii(bytes, offset);
  *
  * console.log(ascii.value); // 'Hello'
+ * console.log(ascii.encodingEnd); // 5
  * ```
  */
 export class Ascii {
+  private readonly buffer: Uint8Array;
+
   constructor(
-    private readonly buffer: Uint8Array,
-    /** The position in the buffer where the string begins. */
+    /** The binary containing the ASCII string. */
+    buffer: ArrayBufferLike | ArrayLike<number>,
+    /** The byte index where the ASCII string begins. Defaults to the start of the buffer. */
     readonly encodingStart = 0,
-  ) {}
+  ) {
+    this.buffer = new Uint8Array(buffer);
+  }
 
   /**
-   * The position of the `NUL` terminator byte.
+   * The byte index of the `NUL` terminator byte.
    *
    * @throws `RangeError` if the end of the buffer was reached without finding the terminator.
    */

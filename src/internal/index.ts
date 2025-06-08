@@ -1,8 +1,4 @@
-/**
- * @module Internal
- * @category API Reference
- * @experimental
- */
+/** @module Internal */
 
 export * from './encoding.js';
 export * from './maybe-promise.js';

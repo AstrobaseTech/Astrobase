@@ -1,10 +1,4 @@
-/**
- * This module provides support for the mutable content identifier scheme.
- *
- * @module Mutable
- * @category API Reference
- * @experimental
- */
+/** @module Mutable */
 
 import { ContentIdentifier } from '../cid/cid.js';
 // prettier-ignore

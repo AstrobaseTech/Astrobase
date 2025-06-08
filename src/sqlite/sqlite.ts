@@ -1,15 +1,4 @@
-/**
- * Implements a client for SQLite that supports content procedures, enabling content storage &
- * retrieval via a SQLite database.
- *
- * Requires `better-sqlite3`:
- *
- *     npm i better-sqlite3
- *
- * @module SQLite
- * @category API Reference
- * @experimental
- */
+/** @module SQLite */
 
 import SQLite from 'better-sqlite3';
 import type { ContentProcedures } from '../content/procedures.js';

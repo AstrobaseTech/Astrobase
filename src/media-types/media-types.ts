@@ -1,8 +1,4 @@
-/**
- * @module Media Types
- * @category API Reference
- * @experimental
- */
+/** @module Media Types */
 
 import { format, parse, type MediaType } from 'content-type';
 

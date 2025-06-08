@@ -1,8 +1,4 @@
-/**
- * @module Middleware
- * @category API Reference
- * @experimental
- */
+/** @module Middleware */
 
 export * from './binary.js';
 export * from './replace.js';
