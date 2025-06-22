@@ -44,7 +44,7 @@ describe('Identity', () => {
     await expect(getIdentity({ id, instance })).resolves.toEqual({
       cid,
       identity: { id, ref },
-      index: 1,
+      index: 0,
     });
 
     ref = new ContentIdentifier('test', Array.from(randomBytes(8)));
@@ -54,7 +54,7 @@ describe('Identity', () => {
     await expect(getIdentity({ id, instance })).resolves.toEqual({
       cid,
       identity: { id, ref },
-      index: 1,
+      index: 0,
     });
   });
 

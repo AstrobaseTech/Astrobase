@@ -94,16 +94,44 @@ export interface GetIdentityOptions extends BaseIdentityOptions {
   id: string;
 }
 
-/** Return type for {@link getIdentity}. */
-export interface GetIdentityResult {
+/** Identity lookup result. */
+export interface IdentityResult {
   /** The content identifier of the identity */
   cid: ContentIdentifier;
 
-  /** The identity content. */
-  identity: Identity;
-
   /** The index of the identity BIP32 derivation. */
   index: number;
+}
+
+/**
+ * Get details of the next available identity.
+ *
+ * @param instance Instance used for keyring and content retrieval.
+ * @param limit Iteration limit before giving up.
+ * @throws If limit reached.
+ */
+export async function getNextIdentity(
+  instance: Instance,
+  limit = Infinity,
+): Promise<IdentityResult> {
+  const account = getAccount(instance);
+
+  for (let i = 0; i < limit; i++) {
+    const { publicKey } = account.derive(i);
+    const cid = new ContentIdentifier(prefix, publicKey);
+    const identity = await getContent<Identity>(cid, instance);
+    if (!identity) {
+      return { cid, index: i };
+    }
+  }
+
+  throw new RangeError('Iteration limit reached before next available identity');
+}
+
+/** {@link getIdentity} lookup result. */
+export interface GetIdentityResult extends IdentityResult {
+  /** The identity content. */
+  identity: Identity;
 }
 
 /**
@@ -132,7 +160,7 @@ export async function getIdentity(options: GetIdentityOptions): Promise<GetIdent
     }
   }
 
-  throw new Error('Identity not found');
+  throw new RangeError('Identity not found');
 }
 
 /** Options for {@link putIdentity}. */
@@ -165,7 +193,7 @@ export async function putIdentity(options: PutIdentityOptions) {
         break;
       }
       lookahead = 0;
-    } else if (lookahead++ == 1) {
+    } else if (++lookahead == 1) {
       // If the lookahead limit is reached without a match, we'll use the first available
       pubKey = publicKey;
       targetCID = derivationCID;

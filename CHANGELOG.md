@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0-beta.2](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.5.0-beta.2) - 2025-06-22
+
+### Added
+
+- **Identity:** Added `getNextIdentity` function.
+
+### Changed
+
+- **Identity:** Changed the error thrown by `getIdentity` to `RangeError`.
+- **Identity:** Changed `bip32` peer dependency version.
+
+### Fixed
+
+- **Identity:** Fixed `putIdentity` not using first available new identity.
+
 ## [0.5.0-beta.1](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.5.0-beta.1) - 2025-06-03
 
 > Big update, added a lot of new functionality and redesigned much of the project. As a result, this changelog is probably not exhaustive.
