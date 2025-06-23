@@ -1,5 +1,8 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "resolveJsonModule": false
+  },
   "include": ["bin", "src"],
   "exclude": ["**/*.test.*", "**/testing/*"]
 }

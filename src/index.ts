@@ -1,7 +1,7 @@
 export * from './ascii/ascii.js';
 export * from './bip39/bip39.js';
 
-import BIP39_WORDLIST_ENGLISH from './bip39/wordlist/en.json' with { type: 'json' };
+import BIP39_WORDLIST_ENGLISH from './bip39/wordlist/en.js';
 export { BIP39_WORDLIST_ENGLISH };
 
 export * from './cid/cid.js';

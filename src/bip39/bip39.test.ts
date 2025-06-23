@@ -3,7 +3,7 @@ import { sha256, SHA_256 } from '../hashing/index.js';
 import { createInstance } from '../instance/instance.js';
 import { entropyToMnemonic, mnemonicToEntropy, mnemonicToSeed, validateWordlist } from './bip39.js';
 import VECTORS from './testing/vectors.json' with { type: 'json' };
-import WORDLIST from './wordlist/en.json' with { type: 'json' };
+import WORDLIST from './wordlist/en.js';
 
 const instance = createInstance({
   hashAlgs: {

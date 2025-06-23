@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto';
 import { describe, expect, test } from 'vitest';
-import wordlist from '../bip39/wordlist/en.json' with { type: 'json' };
+import wordlist from '../bip39/wordlist/en.js';
 import { ContentIdentifier } from '../cid/cid.js';
 import { Common } from '../common/common.js';
 import { deleteContent } from '../content/api.js';

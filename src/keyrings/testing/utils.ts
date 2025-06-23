@@ -1,4 +1,4 @@
-import wordlist from '../../bip39/wordlist/en.json' with { type: 'json' };
+import wordlist from '../../bip39/wordlist/en.js';
 import { Common } from '../../common/common.js';
 import { inMemory } from '../../in-memory/in-memory-client.js';
 import { createInstance, type InstanceConfig } from '../../instance/instance.js';

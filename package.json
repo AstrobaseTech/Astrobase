@@ -34,7 +34,7 @@
       "default": "./dist/bip39/bip39.js"
     },
     "./bip39/wordlist/english": {
-      "default": "./dist/bip39/wordlist/en.json"
+      "default": "./dist/bip39/wordlist/en.js"
     },
     "./cid": {
       "types": "./dist/cid/cid.d.ts",
