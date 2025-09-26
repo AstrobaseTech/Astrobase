@@ -80,7 +80,7 @@ export function getPrivateKey(options: GetPrivateKeyOptions) {
 
     if (compareBytes(derivation.publicKey, options.publicKey)) {
       if (derivation.privateKey) {
-        return derivation.privateKey;
+        return derivation.privateKey as Uint8Array<ArrayBuffer>;
       }
       break;
     }

@@ -96,7 +96,7 @@ export async function loadKeyring<T>(instance: Instance, request: T.LoadKeyringR
   // Unwrap, grab entropy payload
   const entropy = (await (
     await unwrap(instance, wrapBuffer)
-  ).value.getValue(instance)) as Uint8Array;
+  ).value.getValue(instance)) as Uint8Array<ArrayBuffer>;
 
   // Load seed from entropy
   const mnemonic = await entropyToMnemonic(instance, entropy, request.wordlist);

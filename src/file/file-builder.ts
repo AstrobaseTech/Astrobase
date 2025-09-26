@@ -10,9 +10,9 @@ import { encodeMediaType, validateMediaType } from '../media-types/media-types.j
  */
 export class FileBuilder<T = unknown> {
   /** The raw, underlying buffer of the file. */
-  buffer: Uint8Array;
+  buffer: Uint8Array<ArrayBuffer>;
 
-  constructor(fileBuffer: ArrayLike<number> | ArrayBufferLike = [0]) {
+  constructor(fileBuffer: ArrayLike<number> | ArrayBuffer = [0]) {
     this.buffer = new Uint8Array(fileBuffer);
   }
 
@@ -21,7 +21,7 @@ export class FileBuilder<T = unknown> {
    *
    * @returns This file for method chaining.
    */
-  setBuffer(fileBuffer: ArrayLike<number> | ArrayBufferLike) {
+  setBuffer(fileBuffer: ArrayLike<number> | ArrayBuffer) {
     this.buffer = new Uint8Array(fileBuffer);
     return this;
   }
@@ -67,7 +67,7 @@ export class FileBuilder<T = unknown> {
   }
 
   /** The file payload bytes. */
-  get payload(): Uint8Array {
+  get payload(): Uint8Array<ArrayBuffer> {
     return this.buffer.subarray(this.payloadEncodingStart);
   }
 
@@ -77,7 +77,7 @@ export class FileBuilder<T = unknown> {
    * @param payload The payload.
    * @returns This file for method chaining.
    */
-  setPayload(payload: ArrayLike<number> | ArrayBufferLike) {
+  setPayload(payload: ArrayLike<number> | ArrayBuffer) {
     this.buffer = Uint8Array.from([
       ...this.buffer.subarray(0, this.payloadEncodingStart),
       ...new Uint8Array(payload),

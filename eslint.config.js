@@ -1,8 +1,9 @@
 import eslint from '@eslint/js';
+import { defineConfig } from 'eslint/config';
 import prettier from 'eslint-plugin-prettier/recommended';
 import ts from 'typescript-eslint';
 
-export default ts.config(
+export default defineConfig(
   {
     ignores: ['coverage/', 'dist/', 'docs/', 'tmp/'],
   },

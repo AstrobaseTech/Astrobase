@@ -13,7 +13,7 @@ export interface EncryptOptions {
   iterations: number;
 
   /** Nonce or initialization vector. */
-  nonce: Uint8Array;
+  nonce: Uint8Array<ArrayBuffer>;
 
   /** The key derivation function identifier. */
   kdf: 'PBKDF2';
@@ -30,7 +30,7 @@ export interface EncryptOptions {
   pubKey?: Uint8Array;
 
   /** The key derivation salt. */
-  salt: Uint8Array;
+  salt: Uint8Array<ArrayBuffer>;
 }
 
 /**

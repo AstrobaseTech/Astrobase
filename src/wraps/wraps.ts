@@ -10,7 +10,10 @@ import { fromWrapBuffer, toWrapBuffer } from './wrap-buffer.js';
  * @param unwrapped The Wrap type, value to wrap, and metadata;
  * @returns The serialized Wrap buffer as a Promise.
  */
-export async function wrap(instance: Instance, unwrapped: Unwrapped): Promise<Uint8Array> {
+export async function wrap(
+  instance: Instance,
+  unwrapped: Unwrapped,
+): Promise<Uint8Array<ArrayBuffer>> {
   const { type, value } = unwrapped;
 
   const { metadata, payload } = await getOrThrow(instance, 'wraps', type).wrap({
@@ -35,7 +38,10 @@ export async function wrap(instance: Instance, unwrapped: Unwrapped): Promise<Ui
  * @param wrapBuffer The serialized Wrap buffer to unwrap.
  * @returns The {@link Unwrapped} value as a Promise.
  */
-export async function unwrap(instance: Instance, wrapBuffer: Uint8Array): Promise<Unwrapped> {
+export async function unwrap(
+  instance: Instance,
+  wrapBuffer: Uint8Array<ArrayBuffer>,
+): Promise<Unwrapped> {
   const wrap = fromWrapBuffer(wrapBuffer);
 
   const { metadata, payload } = await getOrThrow(instance, 'wraps', wrap.type).unwrap({

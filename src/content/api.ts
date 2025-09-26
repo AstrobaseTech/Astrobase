@@ -99,21 +99,21 @@ export interface PutOptions {
  */
 export async function putContent(
   cid: ContentIdentifierLike,
-  content: ArrayLike<number> | ArrayBufferLike | string,
+  content: ArrayLike<number> | ArrayBuffer | string,
   options: PutOptions,
 ) {
   cid = new ContentIdentifier(cid);
-  content = payloadToBytes(content);
+  const contentBuf = payloadToBytes(content);
   if (options.validate ?? true) {
     const schemeParser = getOrThrow(options.instance, 'schemes', cid.prefix);
-    const parsed = await Promise.resolve(
-      schemeParser(cid, content as Uint8Array, options.instance),
-    ).catch(() => undefined);
+    const parsed = await Promise.resolve(schemeParser(cid, contentBuf, options.instance)).catch(
+      () => undefined,
+    );
     if (parsed === undefined || parsed === null) {
       throw new TypeError('Content failed validation');
     }
   }
   await Promise.allSettled(
-    callProcedureAll(options.instance, 'content:put', { cid, content: content as Uint8Array }),
+    callProcedureAll(options.instance, 'content:put', { cid, content: contentBuf }),
   );
 }

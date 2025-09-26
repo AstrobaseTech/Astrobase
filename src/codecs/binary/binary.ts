@@ -15,7 +15,7 @@ import type { Codec } from '../codecs.js';
  * const customInstance = createInstance({ codecs: { [Binary]: BinaryCodec } });
  * ```
  */
-export const BinaryCodec: Codec<Uint8Array> = {
+export const BinaryCodec: Codec<Uint8Array<ArrayBuffer>> = {
   decode: (v) => v,
   encode: (v) => v,
 };

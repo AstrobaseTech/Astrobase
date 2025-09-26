@@ -33,7 +33,7 @@ export interface Codec<T = unknown> {
    * @returns The deserialized value. Can be in promise form.
    * @throws If the data cannot be deserialized or is invalid, an error should be thrown.
    */
-  decode(payload: Uint8Array, context: CodecContext): MaybePromise<T>;
+  decode(payload: Uint8Array<ArrayBuffer>, context: CodecContext): MaybePromise<T>;
   /**
    * A function that serializes to the binary format. The function should also validate the data. If
    * the data cannot be serialized or is invalid, an error should be thrown.
@@ -43,7 +43,7 @@ export interface Codec<T = unknown> {
    * @returns The serialized bytes. Can be in promise form.
    * @throws If the data cannot be serialized or is invalid, an error should be thrown.
    */
-  encode(data: T, context: CodecContext): MaybePromise<Uint8Array>;
+  encode(data: T, context: CodecContext): MaybePromise<Uint8Array<ArrayBuffer>>;
 
   /**
    * An optional array of {@link Middleware}s that will be scoped only to this codec. Codec-scoped
@@ -67,7 +67,7 @@ export interface Codec<T = unknown> {
  */
 export async function decodeWithCodec(
   instance: Instance,
-  binary: Uint8Array,
+  binary: Uint8Array<ArrayBuffer>,
   mediaType: MediaTypeLike,
 ) {
   mediaType = normalizeMediaType(mediaType);

@@ -7,7 +7,7 @@ import type { Hash } from './hash.js';
  * - An `ArrayBufferLike`.
  * - A {@link Hash} instance.
  */
-export type HashLike = ArrayLike<number> | ArrayBufferLike | Hash;
+export type HashLike = ArrayLike<number> | ArrayBuffer | Hash;
 
 /**
  * A hash function implementation.

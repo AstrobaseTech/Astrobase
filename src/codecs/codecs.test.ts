@@ -22,9 +22,9 @@ describe('Codec unavailable behaviour', () => {
 describe('Codec encode, decode', () => {
   const mediaType = 'test/encode-decode';
 
-  const codec: Codec<Uint8Array> = {
-    decode: vi.fn((p: Uint8Array) => p),
-    encode: vi.fn((p: Uint8Array) => p),
+  const codec: Codec<Uint8Array<ArrayBuffer>> = {
+    decode: vi.fn((p: Uint8Array<ArrayBuffer>) => p),
+    encode: vi.fn((p: Uint8Array<ArrayBuffer>) => p),
   };
 
   const instance = createInstance({
@@ -56,7 +56,7 @@ describe('Codec scoped middleware', () => {
     reviver: vi.fn((_, v: unknown) => v),
   };
 
-  const codec: Codec<Uint8Array> = {
+  const codec: Codec<Uint8Array<ArrayBuffer>> = {
     decode: (p) => p,
     encode: (p) => p,
     middlewares: [middleware],

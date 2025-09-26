@@ -24,7 +24,7 @@ export function hashToBytes(hash: HashLike) {
 export async function validateHash(
   instance: Instance,
   testHash: HashLike,
-  content: ArrayLike<number> | ArrayBufferLike | string,
+  content: ArrayLike<number> | ArrayBuffer | string,
 ) {
   testHash = new Hash(testHash);
   return compareBytes(

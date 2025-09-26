@@ -5,7 +5,7 @@
 import { SHA_256 } from '../hashing/algorithms/sha256.js';
 import { getOrThrow, type Instance } from '../instance/instance.js';
 
-const deriveChecksum = async (instance: Instance, entropy: Uint8Array) =>
+const deriveChecksum = async (instance: Instance, entropy: Uint8Array<ArrayBuffer>) =>
   toBinaryString(new Uint8Array(await getOrThrow(instance, 'hashAlgs', SHA_256)(entropy))).slice(
     0,
     entropy.length / 4,
@@ -51,7 +51,7 @@ export function validateWordlist(wordlist: string[]) {
  */
 export async function entropyToMnemonic(
   instance: Instance,
-  entropy: Uint8Array,
+  entropy: Uint8Array<ArrayBuffer>,
   wordlist: string[],
 ) {
   validateWordlist(wordlist);

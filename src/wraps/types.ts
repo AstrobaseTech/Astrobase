@@ -9,12 +9,12 @@ export type WrapFn<TInputMetadata, TOutputMetadata> = (config: {
   /** The metadata. */
   metadata: TInputMetadata;
   /** The input value. */
-  payload: Uint8Array;
+  payload: Uint8Array<ArrayBuffer>;
 }) => MaybePromise<{
   /** Metadata for the processed value. */
   metadata: TOutputMetadata;
   /** The processed value. */
-  payload: Uint8Array;
+  payload: Uint8Array<ArrayBuffer>;
 }>;
 
 /** A module provided to the Instance config that implements a strategy for a Wrap type. */
@@ -45,5 +45,5 @@ export interface Unwrapped<TValue = unknown, TMetadata = unknown> extends WrapBa
 /** A deserialized wrapped value. */
 export interface Wrapped<T = unknown> extends WrapBase<T> {
   /** The Wrap buffer. */
-  payload: Uint8Array;
+  payload: Uint8Array<ArrayBuffer>;
 }

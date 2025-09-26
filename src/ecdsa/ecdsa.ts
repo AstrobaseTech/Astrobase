@@ -4,7 +4,7 @@ import { getPrivateKey } from '../identity/identity.js';
 import type { Instance } from '../instance/instance.js';
 
 /** SHA-256 via instance algorithm. */
-const sha256 = async (instance: Instance, payload: Uint8Array) =>
+const sha256 = async (instance: Instance, payload: BufferSource) =>
   (await hash(instance, SHA_256, payload)).value;
 
 /**
@@ -16,7 +16,7 @@ const sha256 = async (instance: Instance, payload: Uint8Array) =>
  * @returns The buffer of the signature in a Promise.
  * @throws If the private key is unavailable (i.e. wrong or no keyring loaded).
  */
-export const sign = async (instance: Instance, payload: Uint8Array, publicKey: Uint8Array) =>
+export const sign = async (instance: Instance, payload: BufferSource, publicKey: Uint8Array) =>
   (
     await signAsync(await sha256(instance, payload), getPrivateKey({ instance, publicKey }))
   ).toCompactRawBytes();
@@ -34,7 +34,7 @@ export const sign = async (instance: Instance, payload: Uint8Array, publicKey: U
  */
 export const verify = async (
   instance: Instance,
-  payload: Uint8Array,
+  payload: BufferSource,
   signature: Uint8Array,
   publicKey: Uint8Array,
 ) => nobleVerify(signature, await sha256(instance, payload), publicKey);

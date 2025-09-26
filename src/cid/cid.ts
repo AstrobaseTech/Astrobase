@@ -16,7 +16,7 @@ import type { MaybePromise } from '../internal/index.js';
  */
 export type ContentIdentifierSchemeParser<T> = (
   identifier: ContentIdentifier,
-  content: Uint8Array,
+  content: Uint8Array<ArrayBuffer>,
   instance: Instance,
 ) => MaybePromise<T | undefined>;
 

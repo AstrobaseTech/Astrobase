@@ -5,7 +5,7 @@ export type ContentProcedures = {
   /** The request and response types of the `content:delete` procedure. */
   'content:delete': [ContentIdentifier, void];
   /** The request and response types of the `content:get` procedure. */
-  'content:get': [ContentIdentifier, ArrayBuffer | void];
+  'content:get': [ContentIdentifier, ArrayLike<number> | ArrayBuffer | void];
   /** The request and response types of the `content:put` procedure. */
   'content:put': [PutRequestPayload, void];
 };

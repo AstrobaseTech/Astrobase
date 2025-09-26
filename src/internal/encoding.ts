@@ -10,14 +10,14 @@ export interface BaseEncoder {
    * @param encoded The encoded string.
    * @returns The raw bytes.
    */
-  decode(encoded: string): Uint8Array;
+  decode(encoded: string): Uint8Array<ArrayBuffer>;
   /**
    * Encodes bytes into a string.
    *
    * @param input The bytes to encode.
    * @returns The encoded string.
    */
-  encode(input: Uint8Array): string;
+  encode(input: Uint8Array<ArrayBuffer>): string;
 }
 
 /**
@@ -39,7 +39,7 @@ export const Base64: BaseEncoder = {
    * @param input The bytes to encode.
    * @returns A base64 encoded string.
    */
-  encode: (input: Uint8Array) => btoa(bytesToString(input)),
+  encode: (input: Uint8Array<ArrayBuffer>) => btoa(bytesToString(input)),
 };
 
 /**
@@ -59,7 +59,7 @@ export const stringToBytes = (string: string) =>
  * @param bytes An array of byte values or `ArrayBufferLike`.
  * @returns A string.
  */
-export function bytesToString(bytes: ArrayLike<number> | ArrayBufferLike) {
+export function bytesToString(bytes: ArrayBuffer | ArrayLike<number>) {
   let output = '';
   for (const byte of new Uint8Array(bytes)) {
     output += String.fromCharCode(byte);
@@ -74,7 +74,7 @@ export function bytesToString(bytes: ArrayLike<number> | ArrayBufferLike) {
  * @param input An array of byte values, `ArrayBufferLike`, or base64 encoded string.
  * @returns A `Uint8Array`.
  */
-export const payloadToBytes = (input: ArrayLike<number> | ArrayBufferLike | string) =>
+export const payloadToBytes = (input: ArrayLike<number> | ArrayBuffer | string) =>
   typeof input === 'string' ? Base64.decode(input) : new Uint8Array(input);
 
 /**

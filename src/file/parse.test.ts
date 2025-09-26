@@ -19,5 +19,5 @@ describe('parseAsFile', () => {
   });
 
   test('Throws for invalid file', () =>
-    expect(parseAsFile(cid, randomBytes(64), instance)).rejects.toThrow());
+    expect(parseAsFile(cid, new Uint8Array(randomBytes(64)), instance)).rejects.toThrow());
 });

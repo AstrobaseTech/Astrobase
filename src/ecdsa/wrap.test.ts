@@ -1,3 +1,4 @@
+import assert from 'assert';
 import { randomBytes } from 'crypto';
 import { describe, expect, it } from 'vitest';
 import { ContentIdentifier } from '../cid/cid.js';
@@ -8,7 +9,7 @@ import { createInstanceWithLoadedKeyring } from '../keyrings/testing/utils.js';
 import { ECDSA } from './wrap.js';
 
 describe('ECDSA Wrap', () => {
-  const payload = randomBytes(32);
+  const payload = new Uint8Array(randomBytes(32));
 
   it('Throws if no keyring loaded', () =>
     expect(
@@ -28,7 +29,9 @@ describe('ECDSA Wrap', () => {
       ref: new ContentIdentifier('test', [1, 2, 3]),
     });
 
-    const pub = identityCID!.value;
+    assert(identityCID);
+
+    const pub = identityCID.value;
 
     const { metadata: wrappedMetadata, payload: wrappedPayload } = await ECDSA.wrap({
       instance,

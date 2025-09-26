@@ -25,7 +25,7 @@ describe('File Builder API', () => {
    */
   describe('Set the buffer', () => {
     const file = new FileBuilder();
-    let buffer: Uint8Array;
+    let buffer: Uint8Array<ArrayBuffer>;
 
     test('Assign Uint8Array to setter', () => {
       buffer = crypto.getRandomValues(new Uint8Array(32));
@@ -121,7 +121,7 @@ describe('File Builder API', () => {
       codecs: {
         'test/file-builder-get-value': {
           decode: (payload) => payload.toReversed(),
-          encode: (payload: Uint8Array) => payload,
+          encode: (payload: Uint8Array<ArrayBuffer>) => payload,
         },
       },
     });

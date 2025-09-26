@@ -5,7 +5,7 @@ import { Varint } from '../varint/varint.js';
 import type { Wrapped } from './types.js';
 
 /** Deserializes a Wrap buffer, turning it into a {@link Wrapped} object. */
-export function fromWrapBuffer(wrapBuffer: ArrayLike<number> | ArrayBufferLike): Wrapped {
+export function fromWrapBuffer(wrapBuffer: ArrayLike<number> | ArrayBuffer): Wrapped {
   const typedArray = new Uint8Array(wrapBuffer);
 
   const type = new Ascii(typedArray);
@@ -25,7 +25,7 @@ export function fromWrapBuffer(wrapBuffer: ArrayLike<number> | ArrayBufferLike):
 }
 
 /** Deserializes a {@link Wrapped} value, turning it into a Wrap buffer. */
-export const toWrapBuffer = (wrapped: Wrapped): Uint8Array =>
+export const toWrapBuffer = (wrapped: Wrapped): Uint8Array<ArrayBuffer> =>
   new Uint8Array([
     ...new TextEncoder().encode(wrapped.type),
     0,

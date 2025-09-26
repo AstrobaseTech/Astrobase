@@ -18,11 +18,11 @@
  * ```
  */
 export class Ascii {
-  private readonly buffer: Uint8Array;
+  private readonly buffer: Uint8Array<ArrayBuffer>;
 
   constructor(
     /** The binary containing the ASCII string. */
-    buffer: ArrayBufferLike | ArrayLike<number>,
+    buffer: ArrayBuffer | ArrayLike<number>,
     /** The byte index where the ASCII string begins. Defaults to the start of the buffer. */
     readonly encodingStart = 0,
   ) {
