@@ -7,6 +7,10 @@
 - Upgraded to TypeScript 5.9 and resolved type definition changes.
 - **BIP39:** Changed `@astrobase/sdk/bip39/wordlist/english` to be JavaScript rather than JSON.
 
+### Developer
+
+- Migrated to `pnpm`.
+
 ## [0.5.0-beta.2](https://github.com/AstrobaseTech/Astrobase/releases/tag/v0.5.0-beta.2) - 2025-06-22
 
 ### Added
