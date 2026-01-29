@@ -12,11 +12,11 @@ export interface CryptFnContext {
   /** The nonce/IV. */
   nonce: Uint8Array<ArrayBuffer>;
   /** The payload to process. */
-  payload: BufferSource;
+  payload: Uint8Array<ArrayBuffer>;
 }
 
 /** An encryption algorithm implementation function. */
-export type CryptFn = (context: CryptFnContext) => MaybePromise<ArrayBuffer>;
+export type CryptFn = (context: CryptFnContext) => MaybePromise<Uint8Array<ArrayBuffer>>;
 
 /** A module providing an implementation for a particular encryption algorithm. */
 export interface CryptModule {

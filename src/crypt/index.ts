@@ -1,5 +1,5 @@
 /**
- * @module Encrypt
+ * @module Crypt
  * @experimental
  */
 

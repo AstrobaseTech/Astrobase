@@ -22,6 +22,7 @@ export interface InstanceConfig {
   /** A map of content type string keys & codec implementation values. */
   codecs?: Partial<Record<string, Codec>>;
 
+  /** A map of encryption algorithm identifiers & their implementations. */
   cryptAlgs?: Partial<Record<string, CryptModule>>;
 
   /** A map of hashing algorithm identifiers & their implementations. */

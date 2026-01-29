@@ -12,10 +12,10 @@ export type CryptWrapMetadata = Omit<CryptOptions, 'passphrase'>;
 export const CryptWrapModule: WrapModule<CryptWrapMetadata, CryptWrapMetadata> = {
   unwrap: async ({ instance, metadata, payload }) => ({
     metadata: sanitizeCryptOptions(metadata),
-    payload: new Uint8Array(await decrypt(payload, metadata, instance)),
+    payload: await decrypt(payload, metadata, instance),
   }),
   wrap: async ({ instance, metadata, payload }) => ({
     metadata: sanitizeCryptOptions(metadata),
-    payload: new Uint8Array(await encrypt(payload, metadata, instance)),
+    payload: await encrypt(payload, metadata, instance),
   }),
 };

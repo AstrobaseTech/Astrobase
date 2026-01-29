@@ -64,6 +64,10 @@
       "types": "./dist/crypt/index.d.ts",
       "default": "./dist/crypt/index.js"
     },
+    "./crypt/node": {
+      "types": "./dist/crypt/node.d.ts",
+      "default": "./dist/crypt/node.js"
+    },
     "./crypt/web-crypto": {
       "types": "./dist/crypt/web-crypto.d.ts",
       "default": "./dist/crypt/web-crypto.js"

@@ -4,7 +4,7 @@ import type { CryptOptions } from './options.js';
 
 async function crypt(
   this: 'decrypt' | 'encrypt',
-  payload: BufferSource,
+  payload: Uint8Array<ArrayBuffer>,
   options: CryptOptions,
   instance: Instance,
 ) {

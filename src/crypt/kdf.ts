@@ -33,7 +33,7 @@ export async function deriveKey(instance: Instance, options: CryptOptions) {
     },
     await crypto.subtle.importKey('raw', kdInput, options.kdf, false, ['deriveKey']),
     { name: options.encAlg, length: 256 },
-    false,
+    true,
     ['decrypt', 'encrypt'],
   );
 }

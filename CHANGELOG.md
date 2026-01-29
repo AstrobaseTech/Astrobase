@@ -25,6 +25,12 @@
 - **Crypt:** Renamed `sanitizeOptions` to `sanitizeCryptOptions`.
 - **Crypt:** Renamed `EncryptWrapMetadata` to `CryptWrapMetadata`.
 - **Crypt:** Renamed `EncryptWrapModule` to `CryptWrapModule`.
+- **Crypt:** Changed `decrypt` and `encrypt` to return `Uint8Array`.
+
+### Added
+
+- **Crypt/WebCrypto:** Added support for additional encryption algorithms besides `AES-GCM`.
+- **Crypt/Node:** Added support for `node:crypto` API.
 
 ### Developer
 
