@@ -1,6 +1,6 @@
 {
   "name": "@astrobase/sdk",
-  "version": "0.5.0-beta.2",
+  "version": "0.6.0",
   "description": "An extensible protocol suite for building multi-user apps with native privacy, security, and self-autonomy.",
   "keywords": [
     "astrobase",
@@ -60,13 +60,17 @@
       "types": "./dist/content/index.d.ts",
       "default": "./dist/content/index.js"
     },
+    "./crypt": {
+      "types": "./dist/crypt/index.d.ts",
+      "default": "./dist/crypt/index.js"
+    },
+    "./crypt/web-crypto": {
+      "types": "./dist/crypt/web-crypto.d.ts",
+      "default": "./dist/crypt/web-crypto.js"
+    },
     "./ecdsa": {
       "types": "./dist/ecdsa/index.d.ts",
       "default": "./dist/ecdsa/index.js"
-    },
-    "./encrypt": {
-      "types": "./dist/encrypt/index.d.ts",
-      "default": "./dist/encrypt/index.js"
     },
     "./events": {
       "types": "./dist/events/events.d.ts",

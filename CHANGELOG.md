@@ -6,6 +6,25 @@
 
 - Upgraded to TypeScript 5.9 and resolved type definition changes.
 - **BIP39:** Changed `@astrobase/sdk/bip39/wordlist/english` to be JavaScript rather than JSON.
+- **Crypt:** Added support for supplying encrypt & decrypt algorithm implementations via instance config. If you use `Common` then no changes are needed. Otherwise, Add
+  `WithWebCrypto` from `@astrobase/sdk/crypt/web-crypto` to your instance config to restore previous
+  behaviour.
+- **Crypt:** Renamed module import location from `@astrobase/sdk/encrypt` to `@astrobase/sdk/crypt`.
+- **Crypt & Wraps:** Renamed the wrap identifier `encrypt` to `crypt`. If backwards compatibility is
+  required, add the following to instance:
+  ```js
+  {
+    wraps: {
+      encrypt: CryptWrapModule;
+    }
+  }
+  ```
+- **Crypt:** Renamed `DEFAULTS` to `CRYPT_DEFAULTS`.
+- **Crypt:** Renamed `EncryptOptions` to `CryptOptions`.
+- **Crypt:** Renamed `buildFullOptions` to `cryptOptions`.
+- **Crypt:** Renamed `sanitizeOptions` to `sanitizeCryptOptions`.
+- **Crypt:** Renamed `EncryptWrapMetadata` to `CryptWrapMetadata`.
+- **Crypt:** Renamed `EncryptWrapModule` to `CryptWrapModule`.
 
 ### Developer
 

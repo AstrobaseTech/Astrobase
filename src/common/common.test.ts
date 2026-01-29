@@ -14,16 +14,18 @@ test('Common config', () => {
   expect(() => getOrThrow(instance, 'codecs', JSON)).not.toThrow();
   expect(() => getOrThrow(instance, 'codecs', Wrap)).not.toThrow();
 
+  expect(() => getOrThrow(instance, 'cryptAlgs', 'AES-GCM')).not.toThrow();
+
+  expect(() => getOrThrow(instance, 'hashAlgs', SHA_256)).not.toThrow();
+
   expect(() => getOrThrow(instance, 'procedures', 'content:delete')).not.toThrow();
   expect(() => getOrThrow(instance, 'procedures', 'content:get')).not.toThrow();
   expect(() => getOrThrow(instance, 'procedures', 'content:put')).not.toThrow();
-
-  expect(() => getOrThrow(instance, 'hashAlgs', SHA_256)).not.toThrow();
 
   expect(() => getOrThrow(instance, 'schemes', IMMUTABLE_PREFIX)).not.toThrow();
   expect(() => getOrThrow(instance, 'schemes', MUTABLE_PREFIX)).not.toThrow();
   expect(() => getOrThrow(instance, 'schemes', identityPrefix)).not.toThrow();
 
   expect(() => getOrThrow(instance, 'wraps', 'ECDSA')).not.toThrow();
-  expect(() => getOrThrow(instance, 'wraps', 'encrypt')).not.toThrow();
+  expect(() => getOrThrow(instance, 'wraps', 'crypt')).not.toThrow();
 });

@@ -4,19 +4,19 @@ import { ContentIdentifier } from '../cid/cid.js';
 import { putIdentity } from '../identity/identity.js';
 import { createInstance } from '../instance/instance.js';
 import { createInstanceWithLoadedKeyring } from '../keyrings/testing/utils.js';
-import { buildFullOptions, DEFAULTS, type EncryptOptions } from './encrypt.js';
-import { EncryptWrapModule } from './wrap.js';
+import * as Crypt from './index.js';
+import { WithWebCrypto } from './web-crypto.js';
 
 describe('Encrypt Wrap', () => {
-  const { wrap, unwrap } = EncryptWrapModule;
+  const { wrap, unwrap } = Crypt.CryptWrapModule;
 
   const randomPayload = new Uint8Array(randomBytes(32));
 
   it('Throws if no key derivation input provided', async () => {
     await expect(
       wrap({
-        instance: createInstance(),
-        metadata: buildFullOptions({}),
+        instance: createInstance(WithWebCrypto),
+        metadata: Crypt.cryptOptions({}),
         payload: randomPayload,
       }),
     ).rejects.toThrow('No key derivation input was provided');
@@ -24,20 +24,20 @@ describe('Encrypt Wrap', () => {
 
   test('Passphrase encrypt/decrypt', async () => {
     const passphrase = new TextDecoder().decode(crypto.getRandomValues(new Uint8Array(8)));
-    const instance = createInstance();
+    const instance = createInstance(WithWebCrypto);
 
     const { metadata: encryptOutputMetadata, payload: encryptOutputPayload } = await wrap({
       instance,
-      metadata: buildFullOptions({ passphrase }),
+      metadata: Crypt.cryptOptions({ passphrase }),
       payload: randomPayload,
     });
 
     expect(encryptOutputPayload).toBeInstanceOf(Uint8Array);
     expect(encryptOutputPayload).not.toEqual(randomPayload);
-    expect(encryptOutputMetadata.encAlg).toBe(DEFAULTS.encAlg);
-    expect(encryptOutputMetadata.hashAlg).toBe(DEFAULTS.hashAlg);
-    expect(encryptOutputMetadata.iterations).toBe(DEFAULTS.iterations);
-    expect(encryptOutputMetadata.kdf).toBe(DEFAULTS.kdf);
+    expect(encryptOutputMetadata.encAlg).toBe(Crypt.CRYPT_DEFAULTS.encAlg);
+    expect(encryptOutputMetadata.hashAlg).toBe(Crypt.CRYPT_DEFAULTS.hashAlg);
+    expect(encryptOutputMetadata.iterations).toBe(Crypt.CRYPT_DEFAULTS.iterations);
+    expect(encryptOutputMetadata.kdf).toBe(Crypt.CRYPT_DEFAULTS.kdf);
     expect(encryptOutputMetadata.nonce).toBeInstanceOf(Uint8Array);
     expect(encryptOutputMetadata.nonce).toHaveLength(12);
     expect(encryptOutputMetadata.salt).toBeInstanceOf(Uint8Array);
@@ -45,7 +45,7 @@ describe('Encrypt Wrap', () => {
     expect(encryptOutputMetadata).not.toHaveProperty('passphrase');
     expect(encryptOutputMetadata.pubKey).toBeUndefined();
 
-    const decryptInputMetadata: EncryptOptions = { ...encryptOutputMetadata };
+    const decryptInputMetadata: Crypt.CryptOptions = { ...encryptOutputMetadata };
 
     // Throws because passphrase was sanitized from metadata output
     await expect(
@@ -70,12 +70,12 @@ describe('Encrypt Wrap', () => {
   });
 
   describe('Public key encrypt/decrypt', () => {
-    const randomPubKeyMetadata = buildFullOptions({ pubKey: randomBytes(33) });
+    const randomPubKeyMetadata = Crypt.cryptOptions({ pubKey: randomBytes(33) });
 
     it('Throws if no keyring loaded', () =>
       expect(
         wrap({
-          instance: createInstance(),
+          instance: createInstance(WithWebCrypto),
           metadata: randomPubKeyMetadata,
           payload: randomPayload,
         }),
@@ -103,7 +103,7 @@ describe('Encrypt Wrap', () => {
       });
 
       const pubKey = new Uint8Array(identityCID!.value);
-      const metadata = buildFullOptions({ pubKey });
+      const metadata = Crypt.cryptOptions({ pubKey });
 
       const { metadata: wrappedMetadata, payload: wrappedPayload } = await wrap({
         instance,

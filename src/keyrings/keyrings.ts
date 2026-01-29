@@ -6,7 +6,7 @@
 import { entropyToMnemonic, mnemonicToEntropy, mnemonicToSeed } from '../bip39/bip39.js';
 import { ContentIdentifier, type ContentIdentifierLike } from '../cid/cid.js';
 import { deleteContent, getContent } from '../content/api.js';
-import { buildFullOptions } from '../encrypt/encrypt.js';
+import { cryptOptions } from '../crypt/options.js';
 import { FileBuilder } from '../file/file-builder.js';
 import { putImmutable } from '../immutable/repository.js';
 import type { Instance } from '../instance/instance.js';
@@ -124,8 +124,8 @@ async function saveKeyring(
         payload: await wrap(instance, {
           metadata: await new FileBuilder()
             .setMediaType('application/json')
-            .setValue(buildFullOptions({ passphrase }), instance),
-          type: 'encrypt',
+            .setValue(cryptOptions({ passphrase }), instance),
+          type: 'crypt',
           value: new FileBuilder().setPayload(entropy),
         }),
       },
