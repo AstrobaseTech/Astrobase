@@ -1,5 +1,5 @@
 import type { WrapModule } from '../wraps/types.js';
-import { decrypt, encrypt } from './encrypt.js';
+import { decrypt, encrypt } from './crypt.js';
 import { sanitizeCryptOptions, type CryptOptions } from './options.js';
 
 /**

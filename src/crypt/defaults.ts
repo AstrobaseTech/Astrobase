@@ -20,6 +20,3 @@ export const CRYPT_DEFAULTS = {
   /** The default KDF algorithm used for new encryptions. */
   kdf: 'PBKDF2',
 } as const satisfies Partial<CryptOptions>;
-
-/** @deprecated Renamed to {@link CRYPT_DEFAULTS}. */
-export const DEFAULTS = CRYPT_DEFAULTS;
