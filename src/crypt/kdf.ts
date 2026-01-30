@@ -3,6 +3,8 @@ import type { Instance } from '../instance/instance.js';
 import type { CryptOptions } from './options.js';
 import { deriveWebCryptoKey } from './web-crypto.js';
 
+export type KeyDerivationInputOptions = Pick<CryptOptions, 'passphrase' | 'pubKey'>;
+
 /**
  * Prepares the key derivation input from the {@link CryptOptions}. Requires a key derivation input
  * to be provided - one of {@link CryptOptions.passphrase} or {@link CryptOptions.pubKey}. If `pubkey`
@@ -17,15 +19,15 @@ import { deriveWebCryptoKey } from './web-crypto.js';
  */
 export function prepareKeyDerivationInput(
   instance: Instance,
-  options: Pick<CryptOptions, 'passphrase' | 'pubKey'>,
+  { passphrase, pubKey }: KeyDerivationInputOptions,
 ) {
-  if (options.passphrase) {
-    if (options.pubKey) {
+  if (passphrase) {
+    if (pubKey) {
       throw new TypeError('Ambiguous key derivation input');
     }
-    return new TextEncoder().encode(options.passphrase);
-  } else if (options.pubKey) {
-    return getPrivateKey({ instance, publicKey: options.pubKey });
+    return new TextEncoder().encode(passphrase);
+  } else if (pubKey) {
+    return getPrivateKey({ instance, publicKey: pubKey });
   } else {
     throw new TypeError('Missing key derivation input');
   }
