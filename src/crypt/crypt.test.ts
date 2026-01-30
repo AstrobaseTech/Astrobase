@@ -2,9 +2,12 @@ import { describe, expect, test } from 'vitest';
 import { createInstance } from '../instance/instance.js';
 import { decrypt, encrypt } from './crypt.js';
 import { cryptOptions } from './options.js';
+import { WebCryptoSupportedCryptAlgs } from './web-crypto.js';
 
 describe('Crypt API', () => {
-  const encAlg = 'AES-GCM';
+  // // TODO(fix): KDF uses WebCrypto - requires supported encAlg identifier
+  // const encAlg = new TextDecoder().decode(crypto.getRandomValues(new Uint8Array(6)));
+  const encAlg = WebCryptoSupportedCryptAlgs[0];
 
   const decryptPepper = crypto.getRandomValues(new Uint8Array(16));
   const encryptPepper = crypto.getRandomValues(new Uint8Array(16));

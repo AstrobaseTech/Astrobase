@@ -19,7 +19,17 @@ describe('Encrypt Wrap', () => {
         metadata: Crypt.cryptOptions({}),
         payload: randomPayload,
       }),
-    ).rejects.toThrow('No key derivation input was provided');
+    ).rejects.toThrow('Missing key derivation input');
+  });
+
+  it('Throws if ambiguous key derivation input provided', async () => {
+    await expect(
+      wrap({
+        instance: createInstance(WithWebCrypto),
+        metadata: Crypt.cryptOptions({ passphrase: '1234', pubKey: randomBytes(32) }),
+        payload: randomPayload,
+      }),
+    ).rejects.toThrow('Ambiguous key derivation input');
   });
 
   test('Passphrase encrypt/decrypt', async () => {
@@ -54,7 +64,7 @@ describe('Encrypt Wrap', () => {
         metadata: decryptInputMetadata,
         payload: encryptOutputPayload,
       }),
-    ).rejects.toThrow('No key derivation input was provided');
+    ).rejects.toThrow('Missing key derivation input');
 
     decryptInputMetadata.passphrase = passphrase;
 
