@@ -17,9 +17,9 @@ const sha256 = async (instance: Instance, payload: BufferSource) =>
  * @throws If the private key is unavailable (i.e. wrong or no keyring loaded).
  */
 export const sign = async (instance: Instance, payload: BufferSource, publicKey: Uint8Array) =>
-  (
-    await signAsync(await sha256(instance, payload), getPrivateKey({ instance, publicKey }))
-  ).toCompactRawBytes();
+  await signAsync(await sha256(instance, payload), getPrivateKey({ instance, publicKey }), {
+    prehash: false,
+  });
 
 /**
  * Verifies an ECDSA signature with `@noble/secp256k1`, using the instance defined SHA-256 algorithm
@@ -37,4 +37,4 @@ export const verify = async (
   payload: BufferSource,
   signature: Uint8Array,
   publicKey: Uint8Array,
-) => nobleVerify(signature, await sha256(instance, payload), publicKey);
+) => nobleVerify(signature, await sha256(instance, payload), publicKey, { prehash: false });

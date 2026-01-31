@@ -1,5 +1,8 @@
 minimumReleaseAge: 2880
 
+minimumReleaseAgeExclude:
+  - '@aws-sdk/*'
+
 onlyBuiltDependencies:
   - better-sqlite3
   - esbuild
