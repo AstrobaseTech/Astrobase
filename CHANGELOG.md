@@ -5,6 +5,8 @@
 ### Breaking
 
 - Upgraded to TypeScript 5.9 and resolved type definition changes.
+- Updated peer dependency `@noble/secp256k1` to `^3.0.0`.
+- Updated peer dependency `bip32` to `^5.0.0`.
 - **BIP39:** Changed `@astrobase/sdk/bip39/wordlist/english` to be JavaScript rather than JSON.
 - **Crypt:** Added support for supplying crypt algorithm implementations via instance config. Add
   `WithWebCryptoCrypt` from `@astrobase/sdk/crypt/web-crypto` to your instance config to restore

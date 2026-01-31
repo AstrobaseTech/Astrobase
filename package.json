@@ -247,9 +247,9 @@
   "peerDependencies": {
     "@aws-sdk/client-s3": "^3.0.0",
     "@bitcoinerlab/secp256k1": "^1.0.0",
-    "@noble/secp256k1": "^2.0.0",
+    "@noble/secp256k1": "^3.0.0",
     "better-sqlite3": "*",
-    "bip32": "^5.0.0-rc.0"
+    "bip32": "^5.0.0"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-s3": {
