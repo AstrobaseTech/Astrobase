@@ -17,6 +17,9 @@ export const CRYPT_DEFAULTS = {
   /** The default KDF iterations for new encryptions. */
   iterations: 100000,
 
+  /** The default derived key length for new encryptions. */
+  keyLen: 32,
+
   /** The default KDF algorithm used for new encryptions. */
   kdf: 'PBKDF2',
 } as const satisfies Partial<CryptOptions>;

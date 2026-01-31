@@ -8,7 +8,7 @@ export interface CryptFnContext {
   /** The instance. */
   instance: Instance;
   /** The encryption key to use. */
-  key: CryptoKey;
+  key: Uint8Array<ArrayBuffer>;
   /** The nonce/IV. */
   nonce: Uint8Array<ArrayBuffer>;
   /** The payload to process. */

@@ -6,12 +6,11 @@ import { deleteContent, getContent, putContent } from '../content/api.js';
 import type { PutRequestPayload } from '../content/procedures.js';
 import { ECDSA } from '../ecdsa/wrap.js';
 import { CryptWrapModule } from '../crypt/index.js';
-import { WithWebCrypto } from '../crypt/web-crypto.js';
 import { parseAsFile } from '../file/parse.js';
 import { SHA_256, sha256 } from '../hashing/algorithms/sha256.js';
 import { prefix as identityPrefix, scheme as identityScheme } from '../identity/identity.js';
 import { Immutable, IMMUTABLE_PREFIX } from '../immutable/index.js';
-import { createInstance, type Instance } from '../instance/instance.js';
+import type { InstanceConfig } from '../instance/instance.js';
 import { Binary, JSON as JsonMediaType, Wrap } from '../media-types/media-types.js';
 import { MUTABLE_PREFIX } from '../mutable/mutable.js';
 import { WrapCodec } from '../wraps/codec.js';
@@ -34,7 +33,7 @@ import { WrapCodec } from '../wraps/codec.js';
  *
  *     const instance = createInstance(Common);
  */
-export const Common: Instance = createInstance(WithWebCrypto, {
+export const Common = {
   codecs: {
     [JsonMediaType]: JsonCodec,
     [Binary]: BinaryCodec,
@@ -58,4 +57,4 @@ export const Common: Instance = createInstance(WithWebCrypto, {
     ECDSA,
     crypt: CryptWrapModule,
   },
-});
+} satisfies InstanceConfig;

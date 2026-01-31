@@ -2,11 +2,8 @@ import { randomBytes } from 'crypto';
 import { describe, expect, test } from 'vitest';
 import wordlist from '../bip39/wordlist/en.js';
 import { ContentIdentifier } from '../cid/cid.js';
-import { Common } from '../common/common.js';
 import { deleteContent } from '../content/api.js';
-import { inMemory } from '../in-memory/in-memory-client.js';
 import { createInstance } from '../instance/instance.js';
-
 import {
   activeSeeds,
   clearKeyring,
@@ -15,6 +12,7 @@ import {
   loadKeyring,
   type CreateKeyringRequest,
 } from './keyrings.js';
+import { createInstanceWithRequiredConfig } from './testing/utils.js';
 
 describe('Keyrings', () => {
   test('clearKeyring', () => {
@@ -35,7 +33,7 @@ describe('Keyrings', () => {
   });
 
   describe('createKeyring', () => {
-    const instance = createInstance(Common);
+    const instance = createInstanceWithRequiredConfig();
     const passphrase = '1234';
 
     const testRequest = (testName: string, req: CreateKeyringRequest) =>
@@ -55,7 +53,7 @@ describe('Keyrings', () => {
   });
 
   test('E2E', async () => {
-    const instance = createInstance(Common, { clients: [{ strategy: inMemory() }] });
+    const instance = createInstanceWithRequiredConfig();
     const passphrase = '1234';
     const metadata = { arbitraryData: 'abc' };
 

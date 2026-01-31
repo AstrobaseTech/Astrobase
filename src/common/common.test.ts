@@ -14,8 +14,6 @@ test('Common config', () => {
   expect(() => getOrThrow(instance, 'codecs', JSON)).not.toThrow();
   expect(() => getOrThrow(instance, 'codecs', Wrap)).not.toThrow();
 
-  expect(() => getOrThrow(instance, 'cryptAlgs', 'AES-GCM')).not.toThrow();
-
   expect(() => getOrThrow(instance, 'hashAlgs', SHA_256)).not.toThrow();
 
   expect(() => getOrThrow(instance, 'procedures', 'content:delete')).not.toThrow();

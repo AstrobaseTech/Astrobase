@@ -6,9 +6,9 @@
 
 - Upgraded to TypeScript 5.9 and resolved type definition changes.
 - **BIP39:** Changed `@astrobase/sdk/bip39/wordlist/english` to be JavaScript rather than JSON.
-- **Crypt:** Added support for supplying encrypt & decrypt algorithm implementations via instance config. If you use `Common` then no changes are needed. Otherwise, Add
-  `WithWebCrypto` from `@astrobase/sdk/crypt/web-crypto` to your instance config to restore previous
-  behaviour.
+- **Crypt:** Added support for supplying crypt algorithm implementations via instance config. Add
+  `WithWebCryptoCrypt` from `@astrobase/sdk/crypt/web-crypto` to your instance config to restore
+  previous behaviour.
 - **Crypt:** Renamed module import location from `@astrobase/sdk/encrypt` to `@astrobase/sdk/crypt`.
 - **Crypt & Wraps:** Renamed the wrap identifier `encrypt` to `crypt`. If backwards compatibility is
   required, add the following to instance:
@@ -26,11 +26,19 @@
 - **Crypt:** Renamed `EncryptWrapMetadata` to `CryptWrapMetadata`.
 - **Crypt:** Renamed `EncryptWrapModule` to `CryptWrapModule`.
 - **Crypt:** Changed `decrypt` and `encrypt` to return `Uint8Array`.
+- **Instance:** Renamed `maps` to `dicts`.
+- **KDF:** Added support for supplying KDF implementations via instance config. Add
+  `WithWebCryptoKDF` from `@astrobase/sdk/kdf/web-crypto` to your instance config to restore
+  previous behaviour.
+- **KDF:** KDF input option `pubKey` was renamed to `publicKey`. Existing `encrypt` (now `crypt`)
+  wraps will be affected as they store the `pubKey` field in wrap metadata which is passed verbatim
+  to decrypt.
 
 ### Added
 
-- **Crypt/WebCrypto:** Added support for additional encryption algorithms besides `AES-GCM`.
-- **Crypt/Node:** Added support for `node:crypto` API.
+- **Crypt:** Added modules `@astrobase/sdk/crypt/node` & `@astrobase/sdk/crypt/web-crypto`.
+- **Crypt:** Added support for `node:crypto` API.
+- **KDF:** Added modules `@astrobase/sdk/kdf/node` & `@astrobase/sdk/kdf/web-crypto`.
 
 ### Developer
 

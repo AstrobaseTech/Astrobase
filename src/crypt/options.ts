@@ -1,45 +1,20 @@
+import type { KeyDerivationOptions } from '../kdf/kdf.js';
 import { CRYPT_DEFAULTS } from './defaults.js';
 
 /** Options for the crypt API. */
-export interface CryptOptions {
-  /** The encryption algorithm. */
-  encAlg: string;
-
-  /** The hashing algorithm used for key derivation. */
-  hashAlg: 'SHA-256';
-
-  /** The number of iterations for key derivation. */
-  iterations: number;
-
+export interface CryptOptions extends Omit<KeyDerivationOptions, 'instance'> {
   /** Nonce or initialization vector. */
   nonce: Uint8Array<ArrayBuffer>;
-
-  /** The key derivation function identifier. */
-  kdf: 'PBKDF2';
-
-  /** A passphrase to use for key derivation. */
-  passphrase?: string;
-
-  /**
-   * The public key of the key pair to use for key derivation.
-   *
-   * Note that the public key is merely used to lookup the corresponding private key via the
-   * keyring. A symmetric key is ultimately derived from the private key.
-   */
-  pubKey?: Uint8Array;
-
-  /** The key derivation salt. */
-  salt: Uint8Array<ArrayBuffer>;
 }
 
 /**
  * Builds a full options object from the given options partial. Populates omitted properties with
  * defaults.
  *
- * If any of `encAlg`, `hashAlg`, `iterations`, or `kdf` are not provided, its value from
+ * If any of `encAlg`, `hashAlg`, `iterations`, `kdf`, or `keyLen` are not provided, its value from
  * {@link CRYPT_DEFAULTS} will be used.
  *
- * If `iv` is not provided, 12 random bytes will be generated.
+ * If `nonce` is not provided, 12 random bytes will be generated.
  *
  * If `salt` is not provided, 16 random bytes will be generated.
  *
@@ -52,10 +27,11 @@ export const cryptOptions = (partialOptions: Partial<CryptOptions>): CryptOption
   encAlg: partialOptions.encAlg ?? CRYPT_DEFAULTS.encAlg,
   hashAlg: partialOptions.hashAlg ?? CRYPT_DEFAULTS.hashAlg,
   iterations: partialOptions.iterations ?? CRYPT_DEFAULTS.iterations,
-  nonce: partialOptions.nonce ?? crypto.getRandomValues(new Uint8Array(12)),
   kdf: partialOptions.kdf ?? CRYPT_DEFAULTS.kdf,
+  keyLen: partialOptions.keyLen ?? CRYPT_DEFAULTS.keyLen,
+  nonce: partialOptions.nonce ?? crypto.getRandomValues(new Uint8Array(12)),
   passphrase: partialOptions.passphrase,
-  pubKey: partialOptions.pubKey,
+  publicKey: partialOptions.publicKey,
   salt: partialOptions.salt ?? crypto.getRandomValues(new Uint8Array(16)),
 });
 

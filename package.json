@@ -124,6 +124,18 @@
       "types": "./dist/internal/index.d.ts",
       "default": "./dist/internal/index.js"
     },
+    "./kdf": {
+      "types": "./dist/kdf/kdf.d.ts",
+      "default": "./dist/kdf/kdf.js"
+    },
+    "./kdf/node": {
+      "types": "./dist/kdf/node.d.ts",
+      "default": "./dist/kdf/node.js"
+    },
+    "./kdf/web-crypto": {
+      "types": "./dist/kdf/web-crypto.d.ts",
+      "default": "./dist/kdf/web-crypto.js"
+    },
     "./keyrings": {
       "types": "./dist/keyrings/keyrings.d.ts",
       "default": "./dist/keyrings/keyrings.js"
