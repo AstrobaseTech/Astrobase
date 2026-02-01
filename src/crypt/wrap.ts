@@ -1,12 +1,12 @@
 import type { WrapModule } from '../wraps/types.js';
 import { decrypt, encrypt } from './crypt.js';
-import { sanitizeCryptOptions, type CryptOptions } from './options.js';
+import { sanitizeCryptOptions, type CryptOptionsSanitized } from './options.js';
 
 /**
  * {@link CryptOptions} without sensitive data. Suitable for storing in Wrap metadata for future
  * decryption.
  */
-export type CryptWrapMetadata = Omit<CryptOptions, 'passphrase'>;
+export type CryptWrapMetadata = CryptOptionsSanitized;
 
 /** A Wrap implementation for encrypted payloads. */
 export const CryptWrapModule: WrapModule<CryptWrapMetadata, CryptWrapMetadata> = {

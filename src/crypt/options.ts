@@ -30,14 +30,14 @@ export const cryptOptions = (partialOptions: Partial<CryptOptions>): CryptOption
   salt: partialOptions.salt ?? crypto.getRandomValues(new Uint8Array(16)),
 });
 
+export type CryptOptionsSanitized = Omit<CryptOptions, 'key' | 'passphrase'>;
+
 /**
  * @param options The {@link CryptOptions} object to sanitize.
  * @returns A sanitized version of the given {@link CryptOptions} with sensitive data removed. The
  *   original object remains unmodified.
  */
-export function sanitizeCryptOptions<T extends CryptOptions>(
-  options: T,
-): Omit<T, 'key' | 'passphrase'> {
+export function sanitizeCryptOptions(options: CryptOptions): CryptOptionsSanitized {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { key, passphrase, ...sanitized } = options;
   return sanitized;
