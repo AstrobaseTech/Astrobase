@@ -18,6 +18,9 @@ export interface KeyDerivationOptions extends Partial<GetPrivateKeyOptions> {
   /** The key derivation function identifier. */
   kdf: string;
 
+  /** Key material to use for key derivation. */
+  key?: Uint8Array<ArrayBuffer>;
+
   /** The desired derived key length in bytes. */
   keyLen: number;
 
@@ -39,8 +42,9 @@ export interface KeyDerivationOptions extends Partial<GetPrivateKeyOptions> {
 
 /**
  * Derives a symmetric encryption key using the given options. Requires a key derivation input to be
- * provided - one of {@link CryptOptions.passphrase} or {@link CryptOptions.publicKey}. If `publickey`
- * is provided, then the Identity's private key must be available in the Keyring.
+ * provided - one of {@link CryptOptions.key}, {@link CryptOptions.passphrase} or
+ * {@link CryptOptions.publicKey}. If `publickey` is provided, then the Identity's private key must
+ * be available in the Keyring.
  *
  * The promise will error if no key derivation input is provided or if key derivation fails.
  *
@@ -48,17 +52,26 @@ export interface KeyDerivationOptions extends Partial<GetPrivateKeyOptions> {
  * @returns The derived key bytes as a promise.
  */
 export async function deriveKey({
+  key,
   lookaheadLimit,
   passphrase,
   publicKey,
   ...options
 }: KeyDerivationOptions) {
-  let input;
+  let found = false;
 
-  if (passphrase) {
-    if (publicKey) {
+  for (const input of [key, passphrase, publicKey]) {
+    if (found && input) {
       throw new TypeError('Ambiguous key derivation input');
     }
+    found ||= !!input;
+  }
+
+  let input: Uint8Array<ArrayBuffer>;
+
+  if (key) {
+    input = key;
+  } else if (passphrase) {
     input = new TextEncoder().encode(passphrase);
   } else if (publicKey) {
     input = getPrivateKey({

@@ -19,8 +19,8 @@ async function crypt(
 
 /**
  * Decrypts the payload using the given options. Requires a key derivation input to be provided -
- * one of {@link CryptOptions.passphrase} or {@link CryptOptions.publicKey}. If `publicKey` is
- * provided, then the Identity's private key must be available in the Keyring.
+ * one of {@link CryptOptions.key}, {@link CryptOptions.passphrase} or {@link CryptOptions.publicKey}.
+ * If `publicKey` is provided, then the Identity's private key must be available in the Keyring.
  *
  * The promise will error if no key derivation input is provided, or if key derivation or decryption
  * fails.
@@ -34,8 +34,8 @@ export const decrypt = crypt.bind('decrypt');
 
 /**
  * Encrypts the payload using the given options. Requires a key derivation input to be provided -
- * one of {@link CryptOptions.passphrase} or {@link CryptOptions.publicKey}. If `publicKey` is
- * provided, then the Identity's private key must be available in the Keyring.
+ * one of {@link CryptOptions.key}, {@link CryptOptions.passphrase} or {@link CryptOptions.publicKey}.
+ * If `publicKey` is provided, then the Identity's private key must be available in the Keyring.
  *
  * The promise will error if no key derivation input is provided or if key derivation or encryption
  * fails.

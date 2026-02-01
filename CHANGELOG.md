@@ -41,6 +41,7 @@
 - **Crypt:** Added modules `@astrobase/sdk/crypt/node` & `@astrobase/sdk/crypt/web-crypto`.
 - **Crypt:** Added support for `node:crypto` API.
 - **KDF:** Added modules `@astrobase/sdk/kdf/node` & `@astrobase/sdk/kdf/web-crypto`.
+- **KDF:** Added support for using a raw input material for KDF.
 
 ### Developer
 
